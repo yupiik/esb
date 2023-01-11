@@ -1,0 +1,13 @@
+*~
+.idea
+**/*.iml
+**/*.versionsBackup
+**/*.settings
+**/*.project
+**/*.classpath
+**/*/target
+**/*/privateEnv
+.sdkmanrc
+karaf/**
+target
+
