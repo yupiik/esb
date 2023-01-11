@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023 - Yupiik SAS - https://www.yupiik.com
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>io.yupiik.esbcloud</groupId>
+        <artifactId>esbcloud-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>esbcloud-distribution</artifactId>
+    <name>ESB Cloud :: Distribution</name>
+
+    <properties>
+        <jmx.exporter.version>0.17.2</jmx.exporter.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <type>kar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>enterprise</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>spring</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf.karaf</groupId>
+            <artifactId>apache-cxf</artifactId>
+            <version>${cxf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.karaf</groupId>
+            <artifactId>apache-camel</artifactId>
+            <version>${camel.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>io.yupiik.esbcloud</groupId>
+            <artifactId>esbcloud-features</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>package</defaultGoal>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>io.prometheus.jmx</groupId>
+                            <artifactId>jmx_prometheus_javaagent</artifactId>
+                            <version>${jmx.exporter.version}</version>
+                            <type>jar</type>
+                            <overWrite>false</overWrite>
+                            <outputDirectory>${project.build.directory}/assembly/jmx-exporter</outputDirectory>
+                            <destFileName>jmx-exporter.jar</destFileName>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>filter</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>${karaf.version}</version>
+                <extensions>false</extensions>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <goals>
+                            <goal>assembly</goal>
+                            <goal>archive</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <finalName>${project.artifactId}</finalName>
+                    <bootFeatures>
+                        <feature>wrap</feature>
+                        <feature>bundle</feature>
+                        <feature>config</feature>
+                        <feature>system</feature>
+                        <feature>feature</feature>
+                        <feature>package</feature>
+                        <feature>log</feature>
+                        <feature>ssh</feature>
+                        <feature>instance</feature>
+                        <feature>shell</feature>
+                        <feature>management</feature>
+                        <feature>service</feature>
+                        <feature>jaas</feature>
+                        <feature>deployer</feature>
+                        <feature>diagnostic</feature>
+                        <feature>scr</feature>
+                        <feature>cxf-core</feature>
+                        <feature>cxf-commands</feature>
+                        <feature>camel-core</feature>
+                        <feature>camel-cxf</feature>
+                        <feature>camel-http</feature>
+                        <feature>camel-kafka</feature>
+                    </bootFeatures>
+                    <installedFeatures>
+                        <feature>aries-blueprint</feature>
+                        <feature>shell-compat</feature>
+                    </installedFeatures>
+                    <startupFeatures>
+                        <feature>eventadmin</feature>
+                    </startupFeatures>
+                    <blacklistedBundles>
+                    </blacklistedBundles>
+                    <archiveTarGz>true</archiveTarGz>
+                    <archiveZip>true</archiveZip>
+                    <workDirectory>${project.build.directory}/assembly/karaf</workDirectory>
+                    <pathPrefix>karaf</pathPrefix>
+                    <writeProfiles>true</writeProfiles>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
+                    <from>
+                        <image>ossyupiik/java:17.0.4</image>
+                    </from>
+                    <to>
+                        <image>io.yupiik.esbcloud/esbcloud-distribution:${project.version}</image>
+                    </to>
+                    <container>
+                        <entrypoint>
+                            <entrypoint>/karaf/bin/karaf</entrypoint>
+                            <entrypoint>run</entrypoint>
+                        </entrypoint>
+                        <workingDirectory>/karaf</workingDirectory>
+                        <ports>
+                            <port>8101</port>
+                            <port>1099</port>
+                            <port>44444</port>
+                            <port>8181</port>
+                        </ports>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>target/assembly</path>
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/karaf/bin/karaf</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
