@@ -1,0 +1,143 @@
+#
+# Copyright (c) 2023 - Yupiik SAS - https://www.yupiik.com
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+openapi: 3.0.3
+info:
+  title: API Notification
+  description: |
+    The notification API provide service to sent notification in asynchronous mode.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+    description: Development server
+  - url: https://api.yupiik.io/
+    description: Production server
+tags:
+  - name: notification
+  - name: sla
+paths:
+
+  /notification:
+    post:
+      tags:
+        - notification
+      summary: Send a Notification
+      description: This operation send a Notification
+      operationId: sendNotification
+      requestBody:
+        description: The Notification to be sent
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      responses:
+        200:
+          description: Acknowledged
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+        400:
+          description: Bad Request
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+        401:
+          description: Unauthorized
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+        403:
+          description: Forbidden
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+        405:
+          description: Method Not allowed
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+        409:
+          description: Conflict
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+        500:
+          description: Internal Server Error
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Acknowledge'
+
+  /health/liveness:
+    get:
+      summary: 'A Health Check for liveness'
+      description: 'A Health Check for liveness allows third party services to determine if the application is running'
+      tags:
+        - 'sla'
+      responses:
+        200:
+          description: 'Status information of the API'
+
+  /health/readiness:
+    get:
+      summary: 'A Health Check for readiness'
+      description: 'A Health Check for readiness allows third party services to determine if the application is ready to be used'
+      tags:
+        - 'sla'
+      responses:
+        200:
+          description: 'Status information of the API'
+
+components:
+  schemas:
+    Notification:
+      type: object
+      required:
+        - demand
+      properties:
+        reference:
+          type: string
+          description: The external reference id of the notification
+          example: 'INF161200001'
+        date:
+          type: string
+          description: The date of the notification on timestamp format 01/01/1970 00:00:00 GMT (in millisecond)
+          example: '01/01/1970 00:00:00'
+        message:
+          type: string
+          description: The text message of the notification
+          example: 'Update contract'
+
+    Acknowledge:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          enum:
+            - received
+            - error
+        reason:
+          type: string
+          description: Explanation of the reason for the error which can be shown to a client user.
+          readOnly: true

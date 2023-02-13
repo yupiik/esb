@@ -83,6 +83,13 @@
             <type>xml</type>
         </dependency>
         <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-karaf</artifactId>
+            <version>${activemq.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
             <groupId>io.yupiik.esbcloud</groupId>
             <artifactId>esbcloud-features</artifactId>
             <version>${project.version}</version>
@@ -182,7 +189,7 @@
                         <feature>camel-core</feature>
                         <feature>camel-cxf</feature>
                         <feature>camel-http</feature>
-                        <feature>camel-kafka</feature>
+                        <feature>esb-platform</feature>
                     </bootFeatures>
                     <installedFeatures>
                         <feature>aries-blueprint</feature>
@@ -219,10 +226,15 @@
                         </entrypoint>
                         <workingDirectory>/karaf</workingDirectory>
                         <ports>
-                            <port>8101</port>
-                            <port>1099</port>
-                            <port>44444</port>
+<!--                            <port>8101</port>-->
+<!--                            <port>1099</port>-->
+<!--                            <port>44444</port>-->
+                            <!-- expose http api -->
                             <port>8181</port>
+                            <!-- expose healthcheck api -->
+                            <port>8888</port>
+                            <!-- expose metrics api -->
+                            <port>4444</port>
                         </ports>
                     </container>
                     <extraDirectories>

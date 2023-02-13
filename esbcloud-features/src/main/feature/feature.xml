@@ -16,15 +16,18 @@
     under the License.
 
 -->
-<features name="docawesome-platform-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0"
+<features name="esb-platform-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0"
 		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.6.0">
 
-    <feature name="docawesome-platform" version="${project.version}" description="ESB Cloud main feature">
-        <feature version="${project.version}">docawesome-platform-common</feature>
+    <feature name="esb-platform" version="${project.version}" description="ESB Cloud main feature">
+        <feature version="${project.version}">esb-platform-common</feature>
+        <feature version="${project.version}">esb-platform-amqcf</feature>
+        <feature version="${project.version}">esb-platform-observability</feature>
+        <feature version="${project.version}">esb-platform-endpoint</feature>
     </feature>
 
-	<feature name="docawesome-platform-common" version="${project.version}" description="ESB Cloud common">
+	<feature name="esb-platform-common" version="${project.version}" description="ESB Cloud common">
         <bundle dependency="true">mvn:javax.activation/javax.activation-api/${javax.activation}</bundle>
         <bundle dependency="true">mvn:com.sun.activation/javax.activation/${javax.activation}</bundle>
         <bundle dependency="true">mvn:javax.validation/validation-api/${javax.validation}</bundle>
@@ -37,11 +40,39 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/${jackson.version}</bundle>
 
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/2.6.1_1</bundle>
-
         <feature version="${camel.version}">camel-core</feature>
         <feature version="${camel.version}">camel-cxf</feature>
         <feature version="${camel.version}">camel-http</feature>
-        <feature version="${camel.version}">camel-kafka</feature>
+
+        <bundle>mvn:io.yupiik.esbcloud/esbcloud-specs/${project.version}</bundle>
 	</feature>
+
+    <feature name="esb-platform-amqcf" version="${project.version}" description="ESB Platform ActiveMQ Connection Factory">
+        <feature prerequisite="true">esb-platform-common</feature>
+        <feature prerequisite="true">activemq-client</feature>
+        <feature prerequisite="true">pax-jms-activemq</feature>
+
+        <feature>jms</feature>
+        <feature version="${camel.version}">camel-jms</feature>
+    </feature>
+
+    <feature name="esb-platform-kafka" version="${project.version}" description="ESB Platform ActiveMQ Connection Factory">
+        <feature prerequisite="true">esb-platform-common</feature>
+
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/2.6.1_1</bundle>
+        <feature version="${camel.version}">camel-kafka</feature>
+    </feature>
+
+    <feature name="esb-platform-observability" version="${project.version}" description="ESB Platform Observability">
+        <feature prerequisite="true">esb-platform-common</feature>
+        <feature prerequisite="true">esb-platform-amqcf</feature>
+        <bundle>mvn:io.yupiik.esbcloud/esbcloud-observability/${project.version}</bundle>
+    </feature>
+
+    <feature name="esb-platform-endpoint" version="${project.version}" description="ESB Platform Main Endpoint">
+        <feature prerequisite="true">esb-platform-common</feature>
+        <feature prerequisite="true">esb-platform-amqcf</feature>
+        <bundle>mvn:io.yupiik.esbcloud/esbcloud-endpoint/${project.version}</bundle>
+    </feature>
+
 </features>
