@@ -17,10 +17,17 @@ package io.yupiik.esb.services.endpoint.route;
 
 import io.yupiik.esb.services.endpoint.processor.ResponseProcessor;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.BadRequestException;
 
 public class EndpointRoute extends RouteBuilder {
+
+    private static final Logger logger = LoggerFactory.getLogger(EndpointRoute.class);
+
+    private final static String ROUTING_HEADER = "X-Routing-System";
+
     @Override
     public void configure() {
         onException(BadRequestException.class).handled(true);
@@ -37,6 +44,20 @@ public class EndpointRoute extends RouteBuilder {
             .threads()
 
             .routeId("esbcloud-services-endpoint-route")
+
+            // log exchange headers in debug
+            .process(exchange -> {
+                exchange.getMessage().getHeaders().forEach((key, value) -> logger.debug("Exchange headers :: {} = {}", key, value));
+            })
+
+            // send to dedicated route base on http header value
+            .choice()
+            .when(exchange -> exchange.getIn().hasHeaders()
+                    && exchange.getIn().getHeader(ROUTING_HEADER) != null)
+                .routingSlip(simple("direct-vm:${header[" + ROUTING_HEADER + "]}"))
+            .endChoice().otherwise().end()
+
+            // format http response
             .process(new ResponseProcessor());
     }
 

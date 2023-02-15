@@ -25,6 +25,7 @@
         <feature version="${project.version}">esb-platform-amqcf</feature>
         <feature version="${project.version}">esb-platform-observability</feature>
         <feature version="${project.version}">esb-platform-endpoint</feature>
+        <feature version="${project.version}">esb-platform-routes</feature>
     </feature>
 
 	<feature name="esb-platform-common" version="${project.version}" description="ESB Cloud common">
@@ -56,23 +57,28 @@
         <feature version="${camel.version}">camel-jms</feature>
     </feature>
 
-    <feature name="esb-platform-kafka" version="${project.version}" description="ESB Platform ActiveMQ Connection Factory">
-        <feature prerequisite="true">esb-platform-common</feature>
-
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/2.6.1_1</bundle>
-        <feature version="${camel.version}">camel-kafka</feature>
-    </feature>
-
     <feature name="esb-platform-observability" version="${project.version}" description="ESB Platform Observability">
         <feature prerequisite="true">esb-platform-common</feature>
         <feature prerequisite="true">esb-platform-amqcf</feature>
+
         <bundle>mvn:io.yupiik.esbcloud/esbcloud-observability/${project.version}</bundle>
     </feature>
 
     <feature name="esb-platform-endpoint" version="${project.version}" description="ESB Platform Main Endpoint">
         <feature prerequisite="true">esb-platform-common</feature>
         <feature prerequisite="true">esb-platform-amqcf</feature>
+
         <bundle>mvn:io.yupiik.esbcloud/esbcloud-endpoint/${project.version}</bundle>
+    </feature>
+
+    <feature name="esb-platform-routes" version="${project.version}" description="ESB Platform Routes bundle">
+        <feature prerequisite="true">esb-platform-common</feature>
+        <feature prerequisite="true">esb-platform-amqcf</feature>
+
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/2.6.1_1</bundle>
+        <feature version="${camel.version}">camel-kafka</feature>
+
+        <bundle>mvn:io.yupiik.esbcloud/esbcloud-routes/${project.version}</bundle>
     </feature>
 
 </features>

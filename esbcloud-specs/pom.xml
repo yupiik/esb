@@ -61,13 +61,15 @@
                     <instructions>
                         <Export-Package>
                             io.yupiik.esb.api.jaxrs,
-                            io.yupiik.esb.api.jaxrs.model
+                            io.yupiik.esb.api.jaxrs.model,
+                            io.yupiik.esb.api.jms,
+                            io.yupiik.esb.api.kafka
                         </Export-Package>
                         <Import-Package>
                             *
                         </Import-Package>
                         <Private-Package>
-                            io.yupiik.esb.api.jaxrs*
+                            io.yupiik.esb.api*
                         </Private-Package>
                         <_dsannotations-options>norequirements</_dsannotations-options>
                     </instructions>

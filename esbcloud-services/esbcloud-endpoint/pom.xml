@@ -104,24 +104,6 @@
             <version>3.3.7</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-client</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-kahadb-store</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -139,7 +121,6 @@
                         <Import-Package>
                             io.yupiik.esb.api.jaxrs,
                             io.yupiik.esb.api.jaxrs.model,
-                            javax.jms;version="[1,3)",
                             *
                         </Import-Package>
                         <Private-Package>

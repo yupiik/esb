@@ -24,9 +24,6 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static java.util.Optional.ofNullable;
-import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
-
 public class ResponseProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(ResponseProcessor.class);
@@ -41,10 +38,7 @@ public class ResponseProcessor implements Processor {
         responseBody.setStatus(Acknowledge.Status.received);
         responseBody.setReason("Validated");
 
-        Response.ResponseBuilder
-                responseBuilder = Response.ok(responseBody, MediaType.APPLICATION_JSON)
-                .status(ofNullable(exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class))
-                        .orElse(Response.Status.OK.getStatusCode()));
+        Response.ResponseBuilder responseBuilder = Response.ok(responseBody, MediaType.APPLICATION_JSON).status(Response.Status.OK.getStatusCode());
 
         Response response = responseBuilder.build();
         exchange.getMessage().setBody(response);

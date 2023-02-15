@@ -37,6 +37,13 @@ paths:
       summary: Send a Notification
       description: This operation send a Notification
       operationId: sendNotification
+      parameters:
+        - name: X-Routing-System
+          in: header
+          description: Backend system used to send the notification
+          required: true
+          schema:
+            $ref: '#/components/parameters/X-Routing-System'
       requestBody:
         description: The Notification to be sent
         content:
@@ -109,6 +116,17 @@ paths:
           description: 'Status information of the API'
 
 components:
+  parameters:
+    X-Routing-System:
+      name: "X-Routing-System"
+      in: "header"
+      description: |
+        Backend system used to send the notification:
+        * jms: ActiveMQ broker
+        * kafka: Kafka broker
+      schema:
+        type: string
+
   schemas:
     Notification:
       type: object

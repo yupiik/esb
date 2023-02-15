@@ -19,9 +19,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Acknowledge {
+public class Acknowledge implements Serializable {
 
     private Status status = null;
 

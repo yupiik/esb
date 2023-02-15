@@ -28,9 +28,11 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jms.ConnectionFactory;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -46,10 +48,11 @@ public class EndpointCamelContext {
     private static final Logger logger = LoggerFactory.getLogger(EndpointCamelContext.class);
     private OsgiDefaultCamelContext camelContext;
     private ServiceRegistration<CamelContext> camelServiceRegistration;
+
     @Activate
     public void activate(ComponentContext context) throws Exception {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
-        camelContext.setName("esbcloud-entrypoint");
+        camelContext.setName("esbcloud-endpoint");
 
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));
 

@@ -18,9 +18,10 @@ package io.yupiik.esb.api.jaxrs.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Notification {
+public class Notification implements Serializable {
 
     private @Valid String reference = null;
 

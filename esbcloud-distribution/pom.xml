@@ -184,11 +184,6 @@
                         <feature>deployer</feature>
                         <feature>diagnostic</feature>
                         <feature>scr</feature>
-                        <feature>cxf-core</feature>
-                        <feature>cxf-commands</feature>
-                        <feature>camel-core</feature>
-                        <feature>camel-cxf</feature>
-                        <feature>camel-http</feature>
                         <feature>esb-platform</feature>
                     </bootFeatures>
                     <installedFeatures>

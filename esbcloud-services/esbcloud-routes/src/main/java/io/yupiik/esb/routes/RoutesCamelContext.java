@@ -13,21 +13,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.yupiik.esb.services.observability;
+package io.yupiik.esb.routes;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import io.yupiik.esb.services.observability.component.HealthService;
-import io.yupiik.esb.services.observability.routes.HealthCheckRoute;
-import io.yupiik.esb.services.observability.utils.LogInInterceptor;
+import io.yupiik.esb.routes.route.JmsRoute;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
-import org.apache.camel.health.HealthCheckRegistry;
-import org.apache.camel.impl.health.DefaultHealthCheckRegistry;
-import org.apache.camel.impl.health.RoutesHealthCheckRepository;
 import org.apache.camel.spi.ThreadPoolProfile;
-import org.apache.cxf.Bus;
-import org.apache.cxf.bus.CXFBusFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -37,27 +29,26 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import javax.jms.ConnectionFactory;
 import java.util.Properties;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
 @Component(
-        name = "io.yupiik.esb.services.observability.camelcontext",
+        name = "io.yupiik.esb.routes.camelcontext",
         immediate = true
 )
-public class ObservabilityCamelContext {
-    private static final Logger logger = LoggerFactory.getLogger(ObservabilityCamelContext.class);
+public class RoutesCamelContext {
+    private static final Logger logger = LoggerFactory.getLogger(RoutesCamelContext.class);
     private OsgiDefaultCamelContext camelContext;
     private ServiceRegistration<CamelContext> camelServiceRegistration;
-    @Reference
-    private HealthService healthService;
+    @Reference(target = "(osgi.jndi.service.name=jms/esb)")
+    private ConnectionFactory connectionFactory;
+
     @Activate
     public void activate(ComponentContext context) throws Exception {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
-        camelContext.setName("esbcloud-observability");
+        camelContext.setName("esbcloud-routes");
 
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));
 
@@ -71,26 +62,11 @@ public class ObservabilityCamelContext {
 
         camelContext.getPropertiesComponent().setInitialProperties(initProperties);
         camelContext.getPropertiesComponent().loadProperties();
+
         camelContext.start();
+        camelContext.getRegistry().bind("esbConnectionFactory", connectionFactory);
 
-        Bus bus = CXFBusFactory.getDefaultBus(true);
-        bus.getInInterceptors().add(new LogInInterceptor());
-        camelContext.getRegistry().bind("cxf.bus", bus);
-
-        camelContext.getRegistry().bind("provider.jackson", new JacksonJsonProvider());
-        camelContext.getRegistry().bind("provider.exceptionMapper", (ExceptionMapper<Exception>) throwable -> Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity(throwable.getMessage())
-                .type(MediaType.APPLICATION_JSON)
-                .build());
-
-        camelContext.getRegistry().bind("io.yupiik.esb.services.observability.component.healthService", healthService);
-
-        HealthCheckRegistry checkRegistry = new DefaultHealthCheckRegistry();
-        checkRegistry.register(new RoutesHealthCheckRepository());
-        camelContext.setExtension(HealthCheckRegistry.class, checkRegistry);
-
-        camelContext.addRoutes(new HealthCheckRoute());
+        camelContext.addRoutes(new JmsRoute());
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);
     }
 

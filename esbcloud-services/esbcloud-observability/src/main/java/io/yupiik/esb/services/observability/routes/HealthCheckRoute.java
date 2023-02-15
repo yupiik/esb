@@ -16,6 +16,7 @@
 package io.yupiik.esb.services.observability.routes;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.cxf.common.message.CxfConstants;
 
 import javax.ws.rs.BadRequestException;
 
@@ -39,16 +40,16 @@ public class HealthCheckRoute extends RouteBuilder {
             // GET /health/liveness
             .choice()
             .when(exchange -> exchange.getIn().hasHeaders()
-                    && exchange.getIn().getHeader("operationName") != null
-                    && exchange.getIn().getHeader("operationName", String.class).equals("liveness"))
+                    && exchange.getIn().getHeader(CxfConstants.OPERATION_NAME) != null
+                    && exchange.getIn().getHeader(CxfConstants.OPERATION_NAME, String.class).equals("liveness"))
             .process(exchange -> exchange.getMessage().setBody("UP"))
             .endChoice().otherwise().end()
 
             // GET /health/readiness
             .choice()
             .when(exchange -> exchange.getIn().hasHeaders()
-                    && exchange.getIn().getHeader("operationName") != null
-                    && exchange.getIn().getHeader("operationName", String.class).equals("readiness"))
+                    && exchange.getIn().getHeader(CxfConstants.OPERATION_NAME) != null
+                    && exchange.getIn().getHeader(CxfConstants.OPERATION_NAME, String.class).equals("readiness"))
             .to("bean:io.yupiik.esb.services.observability.component.healthService?method=readiness")
             .endChoice().otherwise().end();
     }
