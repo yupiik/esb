@@ -1,5 +1,7 @@
 = ESB cloud stack
 
+image::https://github.com/yupiik/esb/actions/workflows/maven.yml/badge.svg?branch=main[Github CI]
+
 The purpose of this repository is to show how to build a custom ESB based on Apache Karaf & Apache Camel to be cloud friendly.
 
 == Build
