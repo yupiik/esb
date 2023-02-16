@@ -13,13 +13,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.yupiik.esb.services.endpoint;
+package io.yupiik.esb.services.endpoint.route;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.yupiik.esb.api.jaxrs.model.Notification;
-import io.yupiik.esb.services.endpoint.route.EndpointRoute;
 import org.apache.camel.CamelContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.JMSException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
