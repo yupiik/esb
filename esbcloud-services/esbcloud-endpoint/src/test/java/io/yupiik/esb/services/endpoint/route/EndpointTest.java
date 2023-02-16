@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -43,12 +45,18 @@ class EndpointTest extends CamelTestSupport {
     private static final Logger logger = LoggerFactory.getLogger(EndpointTest.class);
     private final static String PROTOCOL = "http";
     private final static String HOST = "localhost";
-    private final static int PORT = 8080;
+
+    private static int port;
 
     @BeforeAll
     public static void before() {
         RestAssured.baseURI = PROTOCOL + "://" + HOST;
-        RestAssured.port = PORT;
+        try (final ServerSocket serverSocket = new ServerSocket(0)) {
+            port = serverSocket.getLocalPort();
+        } catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+        RestAssured.port = port;
     }
 
     @Test
@@ -78,7 +86,7 @@ class EndpointTest extends CamelTestSupport {
                 .then()
                 .statusCode(200)
                 .assertThat()
-                .body("status",equalTo("received"));;
+                .body("status",equalTo("received"));
     }
 
     @Test
@@ -93,7 +101,7 @@ class EndpointTest extends CamelTestSupport {
                 .then()
                 .statusCode(400)
                 .assertThat()
-                .body("status",equalTo("error"));;
+                .body("status",equalTo("error"));
     }
 
     @Test
@@ -137,7 +145,7 @@ class EndpointTest extends CamelTestSupport {
 
         Properties initProperties = new Properties();
         initProperties.put("esbcloud.endpoint.host", HOST);
-        initProperties.put("esbcloud.endpoint.port", PORT);
+        initProperties.put("esbcloud.endpoint.port", port);
         initProperties.put("esbcloud.endpoint.protocol", PROTOCOL);
         initProperties.put("esbcloud.endpoint.cxf.trace.active", true);
 

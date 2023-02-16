@@ -203,3 +203,19 @@ curl -X 'POST' \
   "message": "Update contract"
 }'
 ----
+
+=== Send notification to unknown
+
+[source,shell]
+----
+curl -X 'POST' \
+  'http://localhost:8080/notification' \
+  -H 'accept: application/json;charset=utf-8' \
+  -H 'X-Routing-System: unknown' \
+  -H 'Content-Type: application/json;charset=utf-8' \
+  -d '{
+  "reference": "INF161200001",
+  "date": "01/01/1970 00:00:00",
+  "message": "Update contract"
+}'
+----
