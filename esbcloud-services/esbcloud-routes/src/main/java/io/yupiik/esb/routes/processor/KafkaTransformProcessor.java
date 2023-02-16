@@ -35,7 +35,7 @@ public class KafkaTransformProcessor implements Processor {
             exchange.getMessage().getHeaders().forEach((key, value) -> logger.debug("KafkaTransformProcessor headers :: {} = {}", key, value));
         }
 
-        Notification notification = exchange.getMessage(Notification.class);
+        Notification notification = exchange.getMessage().getBody(Notification.class);
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 

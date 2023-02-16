@@ -15,8 +15,8 @@
  */
 package io.yupiik.esb.routes.route;
 
-import io.yupiik.esb.api.jms.JmsContext;
 import io.yupiik.esb.api.kafka.KafkaContext;
+import io.yupiik.esb.routes.processor.KafkaTransformProcessor;
 import org.apache.camel.builder.RouteBuilder;
 
 public class KafkaRoute extends RouteBuilder {
@@ -24,13 +24,12 @@ public class KafkaRoute extends RouteBuilder {
     public void configure() {
         onException(Exception.class)
                 .handled(true)
-                .transform()
-                .simple("Error reported: ${exception.message}.");
+                .log("Error reported: ${exception.message}.");
 
         from("direct-vm:kafka")
             .threads()
             .routeId("esbcloud-routes-rest2kafka")
+            .process(new KafkaTransformProcessor())
             .to(KafkaContext.KAFKA_URI.concat(KafkaContext.NOTIFICATION_TOPIC));
     }
-
 }

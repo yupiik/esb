@@ -15,12 +15,17 @@
  */
 package io.yupiik.esb.services.endpoint.route;
 
+import io.yupiik.esb.api.jaxrs.model.Acknowledge;
 import io.yupiik.esb.services.endpoint.processor.ResponseProcessor;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 public class EndpointRoute extends RouteBuilder {
 
@@ -30,11 +35,18 @@ public class EndpointRoute extends RouteBuilder {
 
     @Override
     public void configure() {
-        onException(BadRequestException.class).handled(true);
         onException(Exception.class)
                 .handled(true)
-                .transform()
-                .simple("Error reported: ${exception.message}.");
+                .process(exchange -> {
+                    Throwable caused = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Throwable.class);
+                    Acknowledge responseBody = new Acknowledge();
+                    responseBody.setStatus(Acknowledge.Status.error);
+                    responseBody.setReason(caused.getMessage());
+
+                    Response.ResponseBuilder responseBuilder = Response.ok(
+                            responseBody, MediaType.APPLICATION_JSON).status(Response.Status.BAD_REQUEST.getStatusCode());
+                    exchange.getMessage().setBody(responseBuilder.build());
+                }).end();
 
         from("cxfrs:{{esbcloud.endpoint.protocol}}://{{esbcloud.endpoint.host}}:{{esbcloud.endpoint.port}}" +
                 "?resourceClasses=io.yupiik.esb.api.jaxrs.NotificationApi" +
@@ -47,7 +59,7 @@ public class EndpointRoute extends RouteBuilder {
 
             // log exchange headers in debug
             .process(exchange -> {
-                exchange.getMessage().getHeaders().forEach((key, value) -> logger.debug("Exchange headers :: {} = {}", key, value));
+                exchange.getMessage().getHeaders().forEach((key, value) -> logger.info("Exchange headers :: {} = {}", key, value));
             })
 
             // send to dedicated route base on http header value

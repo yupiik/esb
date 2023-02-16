@@ -24,8 +24,7 @@ public class JmsRoute extends RouteBuilder {
     public void configure() {
         onException(Exception.class)
                 .handled(true)
-                .transform()
-                .simple("Error reported: ${exception.message}.");
+                .log("Error reported: ${exception.message}.");
 
         from("direct-vm:jms")
             .threads()

@@ -22,7 +22,6 @@ import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
-import org.apache.camel.spi.ThreadPoolProfile;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -84,6 +83,7 @@ public class RoutesCamelContext {
         kafkaComponent.setConfiguration(kafkaConfiguration);
         camelContext.addComponent("kafka", kafkaComponent);
 
+        camelContext.addRoutes(new JmsRoute());
         camelContext.addRoutes(new KafkaRoute());
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);
     }
