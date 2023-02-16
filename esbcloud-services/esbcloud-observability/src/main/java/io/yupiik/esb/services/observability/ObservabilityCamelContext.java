@@ -25,7 +25,6 @@ import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.impl.health.DefaultHealthCheckRegistry;
 import org.apache.camel.impl.health.RoutesHealthCheckRepository;
-import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.cxf.Bus;
 import org.apache.cxf.bus.CXFBusFactory;
 import org.osgi.framework.ServiceRegistration;

@@ -139,14 +139,6 @@ public class CamelContextStatus {
             this.id = id;
         }
 
-        //public HealthCheckConfiguration getConfiguration() {
-//            return configuration;
-//        }
-//
-//        public void setConfiguration(HealthCheckConfiguration configuration) {
-//            this.configuration = configuration;
-//        }
-
         public boolean isLiveness() {
             return liveness;
         }
