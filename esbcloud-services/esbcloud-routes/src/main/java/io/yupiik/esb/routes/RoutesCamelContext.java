@@ -16,7 +16,10 @@
 package io.yupiik.esb.routes;
 
 import io.yupiik.esb.routes.route.JmsRoute;
+import io.yupiik.esb.routes.route.KafkaRoute;
 import org.apache.camel.CamelContext;
+import org.apache.camel.component.kafka.KafkaComponent;
+import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.spi.ThreadPoolProfile;
@@ -64,9 +67,24 @@ public class RoutesCamelContext {
         camelContext.getPropertiesComponent().loadProperties();
 
         camelContext.start();
+        
         camelContext.getRegistry().bind("esbConnectionFactory", connectionFactory);
 
-        camelContext.addRoutes(new JmsRoute());
+        KafkaConfiguration kafkaConfiguration = new KafkaConfiguration();
+        kafkaConfiguration.setBrokers(camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.brokers").orElseThrow());
+        kafkaConfiguration.setRetries(3);
+        kafkaConfiguration.setSecurityProtocol(camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.security.protocol").orElseThrow());
+        kafkaConfiguration.setSaslMechanism(camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.security.sasl.mechanism").orElseThrow());
+        kafkaConfiguration.setSaslJaasConfig(
+                camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.security.sasl.jaas.module").orElseThrow() + " required " +
+                        " username=\"" + camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.security.sasl.jaas.username").orElseThrow() + "\"" +
+                        " password=\"" + camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.security.sasl.jaas.password").orElseThrow() + "\";");
+
+        KafkaComponent kafkaComponent = new KafkaComponent();
+        kafkaComponent.setConfiguration(kafkaConfiguration);
+        camelContext.addComponent("kafka", kafkaComponent);
+
+        camelContext.addRoutes(new KafkaRoute());
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);
     }
 
