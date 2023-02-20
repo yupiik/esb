@@ -282,6 +282,7 @@ under the License.
                                 <project.basedir>${project.basedir}</project.basedir>
                                 <project.version>${project.version}</project.version>
                                 <esbcloud.environment>minikube</esbcloud.environment>
+                                <esbcloud.namespace>esbcloud</esbcloud.namespace>
                             </customPlaceholders>
                         </configuration>
                     </execution>

@@ -10,10 +10,7 @@
       "esbcloud.environment": "{{esbcloud.environment}}"
     },
     "annotations": {
-      "io.yupiik.bundlebee/putOnUpdate": "true",
-      "prometheus.io/scrape": "true",
-      "prometheus.io/port": "4444",
-      "prometheus.io/path": "/"
+      "io.yupiik.bundlebee/putOnUpdate": "true"
     }
   },
   "spec": {
@@ -29,6 +26,12 @@
           "deploy.by": "{{user.name:-unknown}}",
           "deploy.at": "{{esbcloud.deploytime:-unset}}",
           "esbcloud.environment": "{{esbcloud.environment}}"
+        },
+        "annotations": {
+          "io.yupiik.bundlebee/putOnUpdate": "true",
+          "prometheus.io/scrape": "true",
+          "prometheus.io/port": "4444",
+          "prometheus.io/path": "/metrics"
         }
       },
       "spec": {

@@ -258,11 +258,34 @@
     {
       "//": "Observability stack",
       "name": "observability",
-      "descriptors": [],
       "dependencies": [
         {
           "name": "io.yupiik.alveoli:monitoring-alveolus:1.0.19",
           "location": "io.yupiik.alveoli:monitoring-alveolus:1.0.19"
+        }
+      ],
+      "patches": [
+        {
+          "descriptorName": "io.yupiik.alveoli_prometheus-simple.clusterrolebinding.yaml",
+          "interpolate": true,
+          "patch": [
+            {
+              "op": "replace",
+              "path": "/subjects/0/namespace",
+              "value": "{{esbcloud.namespace:-esbcloud}}"
+            }
+          ]
+        },
+        {
+          "descriptorName": "io.yupiik.alveoli_loki-simple.rolebinding.yaml",
+          "interpolate": true,
+          "patch": [
+            {
+              "op": "replace",
+              "path": "/subjects/0/namespace",
+              "value": "{{esbcloud.namespace:-esbcloud}}"
+            }
+          ]
         }
       ]
     },
