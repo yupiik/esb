@@ -19,6 +19,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 public class HealthCheckRoute extends RouteBuilder {
     @Override
@@ -51,6 +53,14 @@ public class HealthCheckRoute extends RouteBuilder {
                     && exchange.getIn().getHeader(CxfConstants.OPERATION_NAME) != null
                     && exchange.getIn().getHeader(CxfConstants.OPERATION_NAME, String.class).equals("readiness"))
             .to("bean:io.yupiik.esb.services.observability.component.healthService?method=readiness")
+            .process(exchange -> {
+                if (exchange.getMessage().getBody().equals("NOT_READY")) {
+                    Response.ResponseBuilder responseBuilder = Response.ok(
+                            exchange.getMessage().getBody(),
+                            MediaType.APPLICATION_JSON).status(Response.Status.PRECONDITION_FAILED.getStatusCode());
+                    exchange.getMessage().setBody(responseBuilder.build());
+                }
+            })
             .endChoice().otherwise().end();
     }
 

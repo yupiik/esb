@@ -18,6 +18,7 @@ package io.yupiik.esb.services.observability.component;
 import io.yupiik.esb.services.observability.model.CamelContextStatus;
 import io.yupiik.esb.services.observability.model.ConnectionFactoryStatus;
 import org.apache.camel.CamelContext;
+import org.apache.camel.health.HealthCheck;
 import org.apache.camel.health.HealthCheckHelper;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -36,6 +37,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component(
         name = "io.yupiik.esb.services.observability.component.health",
@@ -54,59 +56,28 @@ public class HealthService {
         this.context = context;
     }
 
-    public Collection<Object> readiness() throws InvalidSyntaxException {
+    public String readiness() throws InvalidSyntaxException {
         final Collection<ServiceReference<CamelContext>> camelContexts = context.getBundleContext().getServiceReferences(CamelContext.class, null);
-        final Collection<Object> status = new ArrayList<>();
+        AtomicReference<String> readiness = new AtomicReference<>("READY");
+
+        // check camel context
         Optional.ofNullable(camelContexts)
                 .orElse(new ArrayList<>())
                 .forEach(ctx ->
                         HealthCheckHelper.invokeReadiness(context.getBundleContext().getService(ctx))
-                                .forEach(result -> status.add(new CamelContextStatus(result)))
+                                .forEach(result -> {
+                                    if (!result.getState().equals(HealthCheck.State.UP)) readiness.set("NOT_READY");
+                                })
                 );
+
+        // check jms connection
         try {
             final Connection connection = connectionFactory.createConnection();
             connection.start();
-            final ConnectionFactoryStatus connectionFactoryStatus = this.buildConnectionFactoryStatus(connection);
-            status.add(connectionFactoryStatus);
             connection.close();
         } catch (JMSException e) {
-            status.add(this.buildConnectionFactoryStatus(e));
+            readiness.set("NOT_READY");
         }
-        return status;
-    }
-
-    private ConnectionFactoryStatus buildConnectionFactoryStatus(Connection connection) throws JMSException {
-        final ConnectionFactoryStatus.Check check = new ConnectionFactoryStatus.Check("osgi.jndi.service.name=jms/esb");
-        final ConnectionFactoryStatus state = new ConnectionFactoryStatus()
-                .check(check)
-                .message("Connection Factory OK")
-                .state("UP");
-        final ConnectionMetaData metaData = connection.getMetaData();
-        state.getMetaData().put("JMSVersion", metaData.getJMSVersion());
-        state.getMetaData().put("JMSMajorVersion", metaData.getJMSMajorVersion());
-        state.getMetaData().put("JMSMinorVersion", metaData.getJMSMinorVersion());
-        state.getMetaData().put("JMSProviderName", metaData.getJMSProviderName());
-        state.getMetaData().put("ProviderVersion", metaData.getProviderVersion());
-        state.getMetaData().put("ProviderMajorVersion", metaData.getProviderMajorVersion());
-        state.getMetaData().put("ProviderMinorVersion", metaData.getProviderMinorVersion());
-        final Enumeration<String> jmsxPropertyNames = metaData.getJMSXPropertyNames();
-        final StringBuilder jmsxPropertyNamesStr = new StringBuilder();
-        Collections.list(jmsxPropertyNames).forEach(o -> jmsxPropertyNamesStr.append(o + " "));
-        state.getMetaData().put("JMSXPropertyNames", jmsxPropertyNamesStr);
-        return state;
-    }
-
-    private ConnectionFactoryStatus buildConnectionFactoryStatus(JMSException exception) {
-        final ConnectionFactoryStatus.Check check = new ConnectionFactoryStatus.Check("osgi.jndi.service.name=jms/esb");
-        final ConnectionFactoryStatus state = new ConnectionFactoryStatus()
-                .check(check)
-                .message("Connection Factory KO")
-                .state("DOWN");
-        final Map<String, Object> metaDataMap = Map.of(
-                "JMSExceptionMessage", exception.getMessage(),
-                "JMSExceptionCause", exception.getCause().getClass().getName()
-        );
-        state.setMetaData(metaDataMap);
-        return state;
+        return readiness.get();
     }
 }
