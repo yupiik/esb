@@ -124,11 +124,6 @@ You can replace the default values.
     <entrypoint>run</entrypoint>
 </entrypoint>
 <workingDirectory>/karaf</workingDirectory>
-<ports>
-    <port>8101</port> <!-- for ssh -->
-    <port>1099</port> <!-- for rmi -->
-    <port>8080</port> <!-- for http -->
-</ports>
 <permissions>
     <permission>
         <file>/karaf/bin/karaf</file> <!-- executable entrypoint -->

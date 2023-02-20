@@ -216,7 +216,7 @@
         "service.name": "esbcloud1",
         "service.nodePort": "31101",
         "service.healthPort": "31102",
-        "service.debugPort": "32101"
+        "service.metricPort": "31103"
       }
     },
     {
@@ -256,12 +256,26 @@
       ]
     },
     {
+      "//": "Observability stack",
+      "name": "observability",
+      "descriptors": [],
+      "dependencies": [
+        {
+          "name": "io.yupiik.alveoli:monitoring-alveolus:1.0.19",
+          "location": "io.yupiik.alveoli:monitoring-alveolus:1.0.19"
+        }
+      ]
+    },
+    {
       "name": "minikube",
       "version": "{{project.version}}",
       "chainDependencies": true,
       "dependencies": [
         {
           "name": "namespace"
+        },
+        {
+          "name": "observability"
         },
         {
           "name": "amq+kafka+services"

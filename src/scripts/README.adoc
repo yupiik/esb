@@ -1,0 +1,7 @@
+= Kubernetes help
+
+* RedPanda Kafka UI: http://192.168.49.2:32001
+* ActiveMQ WebConsole: http://192.168.49.2:31112
+* Prometheus: http://192.168.49.2:32090
+* Grafana: http://192.168.49.2:30300
+* ZipKin: http://192.168.49.2:31411

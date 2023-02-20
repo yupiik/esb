@@ -31,12 +31,12 @@
           "nodePort": {{service.healthPort}}
         },
         {
-          "name":"debug",
+          "name":"monitoring",
           "protocol": "TCP",
-          "port": {{service.debugPort}},
-          "targetPort": {{service.debugPort}},
-          "nodePort": {{service.debugPort}}
-        }
+          "port": 4444,
+          "targetPort": 4444,
+          "nodePort": {{service.metricPort}}
+      }
       ]
     }
   }

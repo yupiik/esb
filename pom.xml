@@ -298,6 +298,13 @@ under the License.
                         <esbcloud.deploytime>${maven.build.timestamp}</esbcloud.deploytime>
                     </customPlaceholders>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>io.yupiik.alveoli</groupId>
+                        <artifactId>monitoring-alveolus</artifactId>
+                        <version>1.0.19</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

@@ -10,7 +10,10 @@
       "esbcloud.environment": "{{esbcloud.environment}}"
     },
     "annotations": {
-      "io.yupiik.bundlebee/putOnUpdate": "true"
+      "io.yupiik.bundlebee/putOnUpdate": "true",
+      "prometheus.io/scrape": "true",
+      "prometheus.io/port": "4444",
+      "prometheus.io/path": "/"
     }
   },
   "spec": {
@@ -79,10 +82,6 @@
               {
                 "name": "monitoring",
                 "containerPort": 4444
-              },
-              {
-                "name": "debug",
-                "containerPort": {{service.debugPort}}
               }
             ],
             "resources": {

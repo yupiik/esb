@@ -14,7 +14,7 @@
         }
     },
     "data": {
-        "_JAVA_OPTIONS": "-Xms128m -Xmx256m",
+        "_JAVA_OPTIONS": "-Xms128m -Xmx256m -javaagent:./../jmx-exporter/jmx-exporter.jar=4444:./etc/jmx-exporter/config.yaml",
         "_DEPLOY_TIME": "{{esbcloud.deploytime:-unset}}",
         "LOG4J2_LOGGING_APPENDER_CONSOLE": "Console",
         "LOG4J2_LOGGING_PATTERN_CONSOLE": "{\"@timestamp\": \"%d{yyyy-MM-dd'T'HH:mm:ss.SSS}\", \"level\": \"%p\", \"logger\": \"%logger{63}:%L\", \"thread\": \"%t\", \"classname\": \"%class{63}\", \"message\": \"%encode{%m%xEx{full}}{JSON}\"}%n",

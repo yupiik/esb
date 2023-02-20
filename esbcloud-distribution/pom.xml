@@ -222,14 +222,6 @@
                             <entrypoint>run</entrypoint>
                         </entrypoint>
                         <workingDirectory>/karaf</workingDirectory>
-                        <ports>
-                            <!-- expose http api -->
-                            <port>8181</port>
-                            <!-- expose healthcheck api -->
-                            <port>8888</port>
-                            <!-- expose metrics api -->
-                            <port>4444</port>
-                        </ports>
                     </container>
                     <extraDirectories>
                         <paths>
