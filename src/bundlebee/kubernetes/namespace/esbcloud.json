@@ -1,0 +1,12 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "name": "{{esbcloud.namespace:-esbcloud}}",
+        "labels": {
+            "deploy.by": "{{user.name:-unknown}}",
+            "deploy.at": "{{esbcloud.deploytime:-unset}}",
+            "esbcloud.environment":"{{esbcloud.environment}}"
+        }
+    }
+}

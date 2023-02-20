@@ -202,6 +202,8 @@
                     <writeProfiles>true</writeProfiles>
                 </configuration>
             </plugin>
+
+            <!-- mvn compile jib:dockerBuild -->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
@@ -221,9 +223,6 @@
                         </entrypoint>
                         <workingDirectory>/karaf</workingDirectory>
                         <ports>
-<!--                            <port>8101</port>-->
-<!--                            <port>1099</port>-->
-<!--                            <port>44444</port>-->
                             <!-- expose http api -->
                             <port>8181</port>
                             <!-- expose healthcheck api -->

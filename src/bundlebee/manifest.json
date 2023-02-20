@@ -1,0 +1,272 @@
+{
+  "$schema": "https://raw.githubusercontent.com/yupiik/bundlebee/gh-pages/generated/jsonschema/manifest.descriptor.json",
+  "alveoli": [
+    {
+      "//type": "template",
+      "name": "_esbcloud",
+      "descriptors": [
+        {
+          "name": "_template/esbcloud/configmap.json",
+          "interpolate": true
+        },
+        {
+          "name": "_template/esbcloud/deployment.json",
+          "interpolate": true
+        },
+        {
+          "name": "_template/esbcloud/service.json",
+          "interpolate": true
+        }
+      ]
+    },
+    {
+      "name": "namespace",
+      "version": "{{project.version}}",
+      "descriptors": [
+        {
+          "name": "namespace/esbcloud.json",
+          "interpolate": true,
+          "await": true,
+          "awaitConditions": [
+            {
+              "command": "apply",
+              "conditions": [
+                {
+                  "type": "JSON_POINTER",
+                  "pointer": "/status/phase",
+                  "value": "Active"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "strimzi",
+      "version": "{{project.version}}",
+      "descriptors": [
+        {
+          "name": "strimzi/kafkas.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator-namespaced.clusterrole.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-kafka-broker.clusterrole.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkatopics.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkaconnectors.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator-kafka-client-delegation.clusterrolebinding.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkamirrormaker2s.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkabridges.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzipodsets.core.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-kafka-client.clusterrole.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator.clusterrolebinding.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-entity-operator.clusterrole.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator-global.clusterrole.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkausers.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator.deployment.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator-entity-operator-delegation.rolebinding.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkaconnects.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkamirrormakers.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator-kafka-broker-delegation.clusterrolebinding.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator.configmap.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/kafkarebalances.kafka.strimzi.io.customresourcedefinition.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator.rolebinding.json",
+          "interpolate": true
+        },
+        {
+          "name": "strimzi/strimzi-cluster-operator.serviceaccount.json",
+          "interpolate": true
+        }
+      ]
+    },
+    {
+      "name": "redpanda-console",
+      "version": "{{project.version}}",
+      "descriptors": [
+        {
+          "name": "redpanda-console/deployment.json",
+          "interpolate": true
+        },
+        {
+          "name": "redpanda-console/service.json",
+          "interpolate": true
+        }
+      ]
+    },
+    {
+      "name": "kafka",
+      "version": "{{project.version}}",
+      "descriptors": [
+        {
+          "name": "kafka/cluster.json",
+          "interpolate": true,
+          "await": true,
+          "awaitConditions": [
+            {
+              "command": "apply",
+              "conditions": [
+                {
+                  "type": "STATUS_CONDITION",
+                  "conditionType": "Ready",
+                  "value": "True"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "strimzi"
+        }
+      ]
+    },
+    {
+      "name": "activemq",
+      "version": "{{project.version}}",
+      "descriptors": [
+        {
+          "name": "activemq/configmap.json",
+          "interpolate": true
+        },
+        {
+          "name": "activemq/deployment.json",
+          "interpolate": true
+        },
+        {
+          "name": "activemq/service.json",
+          "interpolate": true
+        }
+      ],
+      "placeholders": {
+        "service.nodePort": "31111",
+        "service.webconsolePort": "31112"
+      }
+    },
+    {
+      "name": "esbcloud1",
+      "version": "{{project.version}}",
+      "dependencies": [
+        {
+          "name": "_esbcloud"
+        }
+      ],
+      "placeholders": {
+        "service.name": "esbcloud1",
+        "service.nodePort": "31101",
+        "service.healthPort": "31102",
+        "service.debugPort": "32101"
+      }
+    },
+    {
+      "name": "all-esbcloud",
+      "version": "{{project.version}}",
+      "dependencies": [
+        {
+          "name": "esbcloud1"
+        }
+      ]
+    },
+    {
+      "name": "kafka-downstream-services",
+      "version": "{{project.version}}",
+      "dependencies": [
+        {
+          "name": "redpanda-console"
+        },
+        {
+          "name": "all-esbcloud"
+        }
+      ]
+    },
+    {
+      "name": "amq+kafka+services",
+      "version": "{{project.version}}",
+      "dependencies": [
+        {
+          "name": "activemq"
+        },
+        {
+          "name": "kafka"
+        },
+        {
+          "name": "kafka-downstream-services"
+        }
+      ]
+    },
+    {
+      "name": "minikube",
+      "version": "{{project.version}}",
+      "chainDependencies": true,
+      "dependencies": [
+        {
+          "name": "namespace"
+        },
+        {
+          "name": "amq+kafka+services"
+        }
+      ]
+    }
+  ]
+}

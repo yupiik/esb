@@ -1,0 +1,111 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "activemq",
+    "labels": {
+      "app": "activemq",
+      "deploy.by": "{{user.name:-unknown}}",
+      "deploy.at": "{{esbcloud.deploytime:-unset}}",
+      "esbcloud.environment": "{{esbcloud.environment}}"
+    },
+    "annotations": {
+      "io.yupiik.bundlebee/putOnUpdate": "true"
+    }
+  },
+  "spec": {
+    "selector": {
+      "matchLabels": {
+        "app": "activemq"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "activemq",
+          "deploy.by": "{{user.name:-unknown}}",
+          "deploy.at": "{{esbcloud.deploytime:-unset}}",
+          "esbcloud.environment": "{{esbcloud.environment}}"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "activemq",
+            "image": "fpapon/activemq:5.17.3",
+            "imagePullPolicy": "{{service.image.pullPolicy:-IfNotPresent}}",
+            "env": [
+              {
+                "name": "K8S_POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "K8S_POD_NAMESPACE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.namespace"
+                  }
+                }
+              },
+              {
+                "name": "K8S_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              }
+            ],
+            "envFrom": [
+              {
+                "configMapRef": {
+                  "name": "activemq"
+                }
+              }
+            ],
+            "ports": [
+              {
+                "name": "service",
+                "containerPort": 61616
+              },
+              {
+                "name": "webconsole",
+                "containerPort": 8161
+              }
+            ],
+            "resources": {
+              "requests": {
+                "memory": "{{service.resources.requests.memory:-128Mi}}",
+                "cpu": "{{service.resources.requests.cpu:-500m}}"
+              }
+            },
+            "readinessProbe": {
+              "initialDelaySeconds": 4,
+              "periodSeconds": 4,
+              "failureThreshold": 10,
+              "httpGet": {
+                "path": "{{service.probes.readiness.path:-/}}",
+                "port": 8161
+              }
+            },
+            "livenessProbe": {
+              "initialDelaySeconds": 10,
+              "periodSeconds": 30,
+              "failureThreshold": 10,
+              "timeoutSeconds": 30,
+              "httpGet": {
+                "path": "{{service.probes.liveness.path:-/}}",
+                "port": 8161
+              }
+            }
+          }
+        ]
+      }
+    },
+    "replicas": {{service.replicas: -1}}
+  }
+}

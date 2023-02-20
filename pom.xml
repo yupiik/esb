@@ -41,6 +41,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 
         <!-- based stack -->
         <camel.version>3.20.1</camel.version>
@@ -62,6 +63,13 @@
         <junit.version>5.9.0</junit.version>
         <cucumber.version>7.10.1</cucumber.version>
         <restassured.version>5.3.0</restassured.version>
+
+        <esbcloud.image.version>${project.version}</esbcloud.image.version>
+        <esbcloud.version>${project.version}</esbcloud.version>
+        <minikube.alveolus>minikube</minikube.alveolus>
+        <minikube.namespace>esbcloud</minikube.namespace>
+        <minikube.kafka-server>esbcloud-kafka-kafka-bootstrap:9092</minikube.kafka-server>
+        <minikube.activemq-server>activemq.esbcloud:61616</minikube.activemq-server>
     </properties>
 
     <modules>
@@ -253,69 +261,44 @@ under the License.
                     </licenseSets>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>io.yupiik</groupId>
+                <artifactId>bundlebee-maven-plugin</artifactId>
+                <version>1.0.19</version>
+                <executions>
+                    <execution>
+                        <!--
+                        IMPORTANT: ensure to have images in minikube before then deploy
+                        -->
+                        <id>minikube</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <configuration>
+                            <alveolus>${minikube.alveolus}</alveolus>
+                            <kubeNamespace>${minikube.namespace}</kubeNamespace>
+                            <customPlaceholders>
+                                <project.basedir>${project.basedir}</project.basedir>
+                                <project.version>${project.version}</project.version>
+                                <esbcloud.environment>minikube</esbcloud.environment>
+                            </customPlaceholders>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorAwaitTimeout>300000</descriptorAwaitTimeout>
+                    <kubeVerbose>false</kubeVerbose>
+                    <manifest>${project.basedir}/src/bundlebee/manifest.json</manifest>
+                    <mavenRepositoriesDownloadsEnabled>true</mavenRepositoriesDownloadsEnabled>
+                    <skipPackaging>
+                        <skipPackaging>none</skipPackaging>
+                    </skipPackaging>
+                    <customPlaceholders>
+                        <esbcloud.deploytime>${maven.build.timestamp}</esbcloud.deploytime>
+                    </customPlaceholders>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>e2e-on-integration</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M5</version>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/JustHereToOverrideDefaultExclude.java</exclude>
-                            </excludes>
-                            <includes>
-                                <include>e2e/integration/*Test.java</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.karaf.tooling</groupId>
-                        <artifactId>karaf-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>package</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>e2e-on-dev</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M5</version>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/JustHereToOverrideDefaultExclude.java</exclude>
-                            </excludes>
-                            <includes>
-                                <include>e2e/dev/*Test.java</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.karaf.tooling</groupId>
-                        <artifactId>karaf-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>package</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

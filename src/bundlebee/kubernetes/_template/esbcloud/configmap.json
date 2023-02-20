@@ -1,0 +1,40 @@
+{
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": {
+        "name": "{{service.name}}",
+        "labels": {
+            "app": "{{service.name}}",
+            "deploy.by": "{{user.name:-unknown}}",
+            "deploy.at": "{{esbcloud.deploytime:-unset}}",
+            "esbcloud.environment": "{{esbcloud.environment}}"
+        },
+        "annotations": {
+            "io.yupiik.bundlebee/putOnUpdate": "true"
+        }
+    },
+    "data": {
+        "_JAVA_OPTIONS": "-Xms128m -Xmx256m",
+        "_DEPLOY_TIME": "{{esbcloud.deploytime:-unset}}",
+        "LOG4J2_LOGGING_APPENDER_CONSOLE": "Console",
+        "LOG4J2_LOGGING_PATTERN_CONSOLE": "{\"@timestamp\": \"%d{yyyy-MM-dd'T'HH:mm:ss.SSS}\", \"level\": \"%p\", \"logger\": \"%logger{63}:%L\", \"thread\": \"%t\", \"classname\": \"%class{63}\", \"message\": \"%encode{%m%xEx{full}}{JSON}\"}%n",
+        "ESBCLOUD_JMS_CONSUMER": "&acknowledgementModeName=CLIENT_ACKNOWLEDGE&cacheLevelName=CACHE_CONSUMER&concurrentConsumers=10&maxConcurrentConsumers=10",
+        "ESBCLOUD_KAFKA_TOPIC": "dev.esbcloud.notification",
+        "ESBCLOUD_KAFKA_BROKERS": "{{minikube.kafka-server}}",
+        "ESBCLOUD_KAFKA_SECURITY_PROTOCOL": "",
+        "ESBCLOUD_KAFKA_SECURITY_SASL_MECHANISM": "",
+        "ESBCLOUD_KAFKA_SECURITY_SASL_MODULE": "",
+        "ESBCLOUD_KAFKA_SECURITY_SASL_USERNAME": "",
+        "ESBCLOUD_KAFKA_SECURITY_SASL_PASSWORD": "",
+        "ESBCLOUD_ENDPOINT_HOST": "0.0.0.0",
+        "ESBCLOUD_ENDPOINT_PORT": "8080",
+        "ESBCLOUD_ENDPOINT_PROTOCOL": "http",
+        "ESBCLOUD_ENDPOINT_CXF_TRACE_ACTIVE": "false",
+        "ESBCLOUD_HEALTH_ENDPOINT_HOST": "0.0.0.0",
+        "ESBCLOUD_HEALTH_ENDPOINT_PORT": "8888",
+        "ESBCLOUD_HEALTH_ENDPOINT_PROTOCOL": "http",
+        "ESBCLOUD_AMQ_URL": "tcp://{{minikube.activemq-server}}",
+        "ESBCLOUD_AMQ_USER": "admin",
+        "ESBCLOUD_AMQ_PWD": "admin"
+    }
+}

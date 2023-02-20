@@ -1,0 +1,119 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "{{service.name}}",
+    "labels": {
+      "app": "{{service.name}}",
+      "deploy.by": "{{user.name:-unknown}}",
+      "deploy.at": "{{esbcloud.deploytime:-unset}}",
+      "esbcloud.environment": "{{esbcloud.environment}}"
+    },
+    "annotations": {
+      "io.yupiik.bundlebee/putOnUpdate": "true"
+    }
+  },
+  "spec": {
+    "selector": {
+      "matchLabels": {
+        "app": "{{service.name}}"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "{{service.name}}",
+          "deploy.by": "{{user.name:-unknown}}",
+          "deploy.at": "{{esbcloud.deploytime:-unset}}",
+          "esbcloud.environment": "{{esbcloud.environment}}"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "{{service.name}}",
+            "image": "io.yupiik.esbcloud/esbcloud-distribution:{{esbcloud.image.version}}",
+            "imagePullPolicy": "{{service.image.pullPolicy:-IfNotPresent}}",
+            "env": [
+              {
+                "name": "K8S_POD_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              },
+              {
+                "name": "K8S_POD_NAMESPACE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.namespace"
+                  }
+                }
+              },
+              {
+                "name": "K8S_POD_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              }
+            ],
+            "envFrom": [
+              {
+                "configMapRef": {
+                  "name": "{{service.name}}"
+                }
+              }
+            ],
+            "ports": [
+              {
+                "name": "service",
+                "containerPort": 8080
+              },
+              {
+                "name": "health",
+                "containerPort": 8888
+              },
+              {
+                "name": "monitoring",
+                "containerPort": 4444
+              },
+              {
+                "name": "debug",
+                "containerPort": {{service.debugPort}}
+              }
+            ],
+            "resources": {
+              "requests": {
+                "memory": "{{service.resources.requests.memory:-128Mi}}",
+                "cpu": "{{service.resources.requests.cpu:-500m}}"
+              }
+            },
+            "readinessProbe": {
+              "initialDelaySeconds": 10,
+              "periodSeconds": 10,
+              "failureThreshold": 10,
+              "httpGet": {
+                "path": "{{service.probes.readiness.path:-/health/liveness}}",
+                "port": 8888
+              }
+            },
+            "livenessProbe": {
+              "initialDelaySeconds": 10,
+              "periodSeconds": 30,
+              "failureThreshold": 10,
+              "timeoutSeconds": 30,
+              "httpGet": {
+                "path": "{{service.probes.liveness.path:-/health/liveness}}",
+                "port": 8888
+              }
+            }
+          }
+        ]
+      }
+    },
+    "replicas": {{service.replicas: -1}}
+  }
+}

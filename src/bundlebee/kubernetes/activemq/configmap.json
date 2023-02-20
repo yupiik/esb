@@ -1,0 +1,19 @@
+{
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": {
+        "name": "activemq",
+        "labels": {
+            "app": "activemq",
+            "deploy.by": "{{user.name:-unknown}}",
+            "deploy.at": "{{esbcloud.deploytime:-unset}}"
+        },
+        "annotations": {
+            "io.yupiik.bundlebee/putOnUpdate": "true"
+        }
+    },
+    "data": {
+        "_JAVA_OPTIONS": "-Xms128m -Xmx256m",
+        "_DEPLOY_TIME": "{{esbcloud.deploytime:-unset}}"
+    }
+}

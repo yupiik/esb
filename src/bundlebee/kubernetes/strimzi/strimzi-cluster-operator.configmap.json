@@ -1,0 +1,17 @@
+{
+  "kind":"ConfigMap",
+  "apiVersion":"v1",
+  "data":{
+    "log4j2.properties":"name = COConfig\nmonitorInterval = 30\n\nappender.console.type = Console\nappender.console.name = STDOUT\nappender.console.layout.type = PatternLayout\nappender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n\n\nrootLogger.level = ${env:STRIMZI_LOG_LEVEL:-INFO}\nrootLogger.appenderRefs = stdout\nrootLogger.appenderRef.console.ref = STDOUT\n\n# Kafka AdminClient logging is a bit noisy at INFO level\nlogger.kafka.name = org.apache.kafka\nlogger.kafka.level = WARN\n\n# Zookeeper is very verbose even on INFO level -> We set it to WARN by default\nlogger.zookeepertrustmanager.name = org.apache.zookeeper\nlogger.zookeepertrustmanager.level = WARN\n\n# Keeps separate level for Netty logging -> to not be changed by the root logger\nlogger.netty.name = io.netty\nlogger.netty.level = INFO\n"
+  },
+  "metadata":{
+    "name":"strimzi-cluster-operator",
+    "namespace":"{{esbcloud.namespace:-esbcloud}}",
+    "labels":{
+      "app":"strimzi",
+      "deploy.by":"{{user.name:-unknown}}",
+      "deploy.at":"{{esbcloud.environment}}",
+      "esbcloud.environment":"{{esbcloud.environment}}"
+    }
+  }
+}

@@ -1,0 +1,241 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ESB Cloud template
+  description: deploy ESB Cloud
+objects:
+
+  # HTTP service
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        description: Exposes and load balances ESB Cloud API
+      labels:
+        app: ${appname}
+      name: ${appname}
+    spec:
+      ports:
+        - name: http
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+        - name: http-health
+          port: 8888
+          protocol: TCP
+          targetPort: 8888
+        - name: http-jmx
+          port: 4444
+          protocol: TCP
+          targetPort: 4444
+      selector:
+        app: ${appname}
+
+  # Main deployment config
+  - apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      annotations:
+        description: The deployment configuration of ESB Cloud.
+      labels:
+        app: ${appname}
+      name: ${appname}
+    spec:
+      replicas: ${replicas}
+      revisionHistoryLimit: 1
+      selector:
+        app: ${appname}
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app: ${appname}
+        spec:
+          containers:
+            - env:
+                - name: JAVA_OPTS
+                  value: "-Xms128m -Xmx256m -javaagent:./../jmx-exporter/jmx-exporter.jar=4444:./etc/jmx-exporter/config.yaml"
+                - name: GC_MAX_HEAP_FREE_RATIO
+                  value: "40"
+                - name: GC_MIN_HEAP_FREE_RATIO
+                  value: "20"
+                - name: GC_MAX_METASPACE_SIZE
+                  value: "256"
+                - name: GC_METASPACE_SIZE
+                  value: "96"
+                - name: JAVA_TOOL_OPTIONS
+                  value: >-
+                    -Dhttp.proxyHost=${java_http_proxy_host} -Dhttp.proxyPort=${java_http_proxy_port}
+                    -Dhttps.proxyHost=${java_http_proxy_host} -Dhttps.proxyPort=${java_http_proxy_port}
+                    -Dhttp.nonProxyHosts="${java_no_proxy}" -Dhttps.nonProxyHosts="${java_no_proxy}"
+                - name: LOG4J2_LOGGING_APPENDER_CONSOLE
+                  value: "Console"
+                - name: LOG4J2_LOGGING_PATTERN_CONSOLE
+                  value: "{\"@timestamp\": \"%d{yyyy-MM-dd'T'HH:mm:ss.SSS}\", \"level\": \"%p\", \"logger\": \"%logger{63}:%L\", \"thread\": \"%t\", \"classname\": \"%class{63}\", \"message\": \"%encode{%m%xEx{full}}{JSON}\"}%n"
+
+                # JMS Consumer config
+                - name: ESBCLOUD_JMS_CONSUMER
+                  value: '${jms_consumer}'
+
+                # Kafka client config
+                - name: ESBCLOUD_KAFKA_TOPIC
+                  value: '${kafka_topic}'
+                - name: ESBCLOUD_KAFKA_BROKERS
+                  value: '${kafka_broker}'
+                - name: ESBCLOUD_KAFKA_IS_RETRY_CONSUMING_ROUTE_UP
+                  value: "true"
+                - name: ESBCLOUD_KAFKA_SECURITY_PROTOCOL
+                  value: "SASL_PLAINTEXT"
+                - name: ESBCLOUD_KAFKA_SECURITY_SASL_MECHANISM
+                  value: "SCRAM-SHA-512"
+                - name: ESBCLOUD_KAFKA_SECURITY_SASL_MODULE
+                  value: "org.apache.kafka.common.security.scram.ScramLoginModule"
+                - name: ESBCLOUD_KAFKA_SECURITY_SASL_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: 'esbcloud-kafka-user'
+                      key: username
+                - name: ESBCLOUD_KAFKA_SECURITY_SASL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: 'esbcloud-kafka-user'
+                      key: password
+
+                # Main api endpoint config
+                - name: ESBCLOUD_ENDPOINT_HOST
+                  value: '0.0.0.0'
+                - name: ESBCLOUD_ENDPOINT_PORT
+                  value: '8080'
+                - name: ESBCLOUD_ENDPOINT_PROTOCOL
+                  value: 'http'
+                - name: ESBCLOUD_ENDPOINT_CXF_TRACE_ACTIVE
+                  value: 'false'
+
+                # Health api endpoint config
+                - name: ESBCLOUD_HEALTH_ENDPOINT_HOST
+                  value: '0.0.0.0'
+                - name: ESBCLOUD_HEALTH_ENDPOINT_PORT
+                  value: '8888'
+                - name: ESBCLOUD_HEALTH_ENDPOINT_PROTOCOL
+                  value: 'http'
+
+              image: ${image_registry}/${image_name}:${image_version}
+              imagePullPolicy: IfNotPresent
+              name: esbcloud
+              command:
+                - /deployments/karaf/karaf/bin/karaf
+              args:
+                - run
+              ports:
+                - containerPort: 8080
+                  name: http
+                  protocol: TCP
+                - containerPort: 8888
+                  name: http-health
+                  protocol: TCP
+                - containerPort: 4444
+                  name: http-jmx
+                  protocol: TCP
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8888
+                  scheme: HTTP
+                initialDelaySeconds: 180
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8888
+                  scheme: HTTP
+                initialDelaySeconds: 10
+              securityContext:
+                privileged: false
+              resources:
+                requests:
+                  memory: ${resources_requests_memory}
+                  cpu: ${resources_requests_cpu}
+                limits:
+                  memory: ${resources_limits_memory}
+                  cpu: ${resources_limits_cpu}
+      triggers:
+        - type: ConfigChange
+
+  # Route to expose main api
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      annotations:
+        description: The route exposes the service at a hostname.
+      labels:
+        app: ${appname}
+      name: ${appname}
+    spec:
+      host: ${route_hostname}
+      port:
+        targetPort: http
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: ${appname}
+
+  # Route to expose metric api
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      annotations:
+        description: The route exposes the metric service at a hostname.
+      labels:
+        app: ${appname}
+      name: ${appname}-metric
+    spec:
+      host: metric-${route_hostname}
+      port:
+        targetPort: http-jmx
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: ${appname}
+
+parameters:
+  - name: appname
+    description: "the application target name to use in this environment (provided by GitLab CI template)"
+    required: true
+  - name: route_hostname
+    description: "the environment hostname (provided by GitLab CI template)"
+    required: true
+  - name: image_registry
+    description: "the image registry to use (provided by Gitlab CI template or the project)"
+    required: true
+  - name: image_version
+    description: "the version to build and deploy (provided by Gitlab CI template or the project)"
+    required: true
+  - name: image_name
+    description: "the name of the imagestream to build and deploy (provided by Gitlab CI template or the project)"
+    required: true
+  - name: kafka_broker
+    description: "the kafka broker host"
+    required: true
+  - name: kafka_topic
+    description: "the kafka topic"
+    required: true
+  - name: java_http_proxy_host
+    description: "Proxy HTTP to use"
+    required: true
+  - name: java_http_proxy_port
+    description: "Proxy Port to use"
+    required: true
+  - name: java_no_proxy
+    description: "List of non proxy hosts"
+    required: true
+  - name: replicas
+    description: "Number of pod replicas. Default value is 1"
+    value: "1"
+  #  default Resources Requests
+  - name: resources_requests_memory
+  - name: resources_requests_cpu
+  # default Resources Limits
+  - name: resources_limits_memory
+  - name: resources_limits_cpu

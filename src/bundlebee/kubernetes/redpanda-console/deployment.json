@@ -1,0 +1,72 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "redpanda-console",
+    "labels": {
+      "app": "redpanda-console",
+      "deploy.by": "{{user.name:-unknown}}",
+      "deploy.at": "{{esbcloud.deploytime:-unset}}",
+      "esbcloud.environment": "{{esbcloud.environment}}"
+    },
+    "annotations": {
+      "io.yupiik.bundlebee/putOnUpdate": "true"
+    }
+  },
+  "spec": {
+    "selector": {
+      "matchLabels": {
+        "app": "redpanda-console"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "redpanda-console",
+          "deploy.by": "{{user.name:-unknown}}",
+          "deploy.at": "{{esbcloud.deploytime:-unset}}",
+          "esbcloud.environment": "{{esbcloud.environment}}"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "redpanda-console",
+            "image": "vectorized/console:latest",
+            "imagePullPolicy": "{{service.image.pullPolicy:-IfNotPresent}}",
+            "command": [
+              "/bin/sh"
+            ],
+            "args": [
+              "-c",
+              "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+            ],
+            "env": [
+              {
+                "name": "CONFIG_FILEPATH",
+                "value": "/tmp/config.yml"
+              },
+              {
+                "name": "CONSOLE_CONFIG_FILE",
+                "value": "{\"kafka\":{\"brokers\":[\"{{minikube.kafka-server}}\"],\"schemaRegistry\":{\"enabled\":false}},\"redpanda\":{\"adminApi\":{\"enabled\":false}},\"connect\":{\"enabled\":false}}"
+              }
+            ],
+            "ports": [
+              {
+                "name": "service",
+                "containerPort": 8080
+              }
+            ],
+            "resources": {
+              "requests": {
+                "memory": "{{service.resources.requests.memory:-128Mi}}",
+                "cpu": "{{service.resources.requests.cpu:-500m}}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "replicas": {{service.replicas: -1}}
+  }
+}
