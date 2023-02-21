@@ -18,9 +18,14 @@ package io.yupiik.esb.services.endpoint;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.yupiik.esb.services.endpoint.route.EndpointRoute;
 import org.apache.camel.CamelContext;
+import org.apache.camel.component.cxf.jaxrs.CxfRsComponent;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.spi.ThreadPoolProfile;
+import org.apache.camel.support.jsse.KeyManagersParameters;
+import org.apache.camel.support.jsse.KeyStoreParameters;
+import org.apache.camel.support.jsse.SSLContextParameters;
+import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.apache.cxf.Bus;
 import org.apache.cxf.bus.CXFBusFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -28,11 +33,9 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.ConnectionFactory;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -83,6 +86,23 @@ public class EndpointCamelContext {
                 .entity(throwable.getMessage())
                 .type(MediaType.APPLICATION_JSON)
                 .build());
+
+        KeyStoreParameters keyStoreParameters = new KeyStoreParameters();
+        keyStoreParameters.setResource(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.keystore").get());
+        keyStoreParameters.setPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
+
+        KeyManagersParameters keyManagersParameters = new KeyManagersParameters();
+        keyManagersParameters.setKeyStore(keyStoreParameters);
+        keyManagersParameters.setKeyPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
+
+        TrustManagersParameters trustManagersParameters = new TrustManagersParameters();
+        trustManagersParameters.setKeyStore(keyStoreParameters);
+
+        SSLContextParameters sslContextParameters = new SSLContextParameters();
+        sslContextParameters.setKeyManagers(keyManagersParameters);
+        sslContextParameters.setTrustManagers(trustManagersParameters);
+
+        camelContext.getRegistry().bind("sslContext", sslContextParameters);
 
         camelContext.addRoutes(new EndpointRoute());
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);

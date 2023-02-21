@@ -22,8 +22,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -52,7 +50,8 @@ public class EndpointRoute extends RouteBuilder {
                 "?resourceClasses=io.yupiik.esb.api.jaxrs.NotificationApi" +
                 "&providers=provider.jackson,provider.exceptionMapper" +
                 "&loggingFeatureEnabled={{esbcloud.endpoint.cxf.trace.active}}" +
-                "&advanced.bus=cxf.bus")
+                "&advanced.bus=cxf.bus" +
+                "&sslContextParameters=#sslContext")
             .threads()
 
             .routeId("esbcloud-services-endpoint-route")
