@@ -24,9 +24,7 @@ import java.util.Objects;
 public class Notification implements Serializable {
 
     private @Valid String reference = null;
-
     private @Valid String date = null;
-
     private @Valid String message = null;
 
     /**
@@ -36,7 +34,6 @@ public class Notification implements Serializable {
         this.reference = reference;
         return this;
     }
-
 
     @JsonProperty("reference")
     public String getReference() {
@@ -55,7 +52,6 @@ public class Notification implements Serializable {
         return this;
     }
 
-
     @JsonProperty("date")
     public String getDate() {
         return date;
@@ -73,7 +69,6 @@ public class Notification implements Serializable {
         return this;
     }
 
-
     @JsonProperty("message")
     public String getMessage() {
         return message;
@@ -82,7 +77,6 @@ public class Notification implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
-
 
     @Override
     public boolean equals(java.lang.Object o) {

@@ -34,10 +34,12 @@ public class ResponseProcessor implements Processor {
             exchange.getMessage().getHeaders().forEach((key, value) -> logger.debug("ResponseProcessor headers :: {} = {}", key, value));
         }
 
+        // set response entity
         Acknowledge responseBody = new Acknowledge();
         responseBody.setStatus(Acknowledge.Status.received);
         responseBody.setReason("Validated");
 
+        // create rest response
         Response.ResponseBuilder responseBuilder = Response.ok(responseBody, MediaType.APPLICATION_JSON).status(Response.Status.OK.getStatusCode());
 
         Response response = responseBuilder.build();

@@ -50,7 +50,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 class JmsRouteTest extends CamelTestSupport {
-    private static final Logger logger = LoggerFactory.getLogger(JmsRouteTest.class);
     private static String BROKER_URL = "tcp://localhost:";
     private final static String BROKER_QUEUE = "notification";
     private static BrokerService broker;

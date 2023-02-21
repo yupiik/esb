@@ -25,7 +25,6 @@ import java.util.Objects;
 public class Acknowledge implements Serializable {
 
     private Status status = null;
-
     private @Valid String reason = null;
 
     /**
@@ -62,7 +61,6 @@ public class Acknowledge implements Serializable {
     public void setReason(String reason) {
         this.reason = reason;
     }
-
 
     @Override
     public boolean equals(java.lang.Object o) {

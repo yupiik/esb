@@ -23,15 +23,9 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.properties.PropertiesComponent;
-import org.apache.camel.support.jsse.KeyManagersParameters;
-import org.apache.camel.support.jsse.KeyStoreParameters;
-import org.apache.camel.support.jsse.SSLContextParameters;
-import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -46,8 +40,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 class EndpointTest extends CamelTestSupport {
 
-    private static final Logger logger = LoggerFactory.getLogger(EndpointTest.class);
-    private final static String PROTOCOL = "https";
+    private final static String PROTOCOL = "http";
     private final static String HOST = "localhost";
 
     private static int port;
@@ -152,8 +145,6 @@ class EndpointTest extends CamelTestSupport {
         initProperties.put("esbcloud.endpoint.port", port);
         initProperties.put("esbcloud.endpoint.protocol", PROTOCOL);
         initProperties.put("esbcloud.endpoint.cxf.trace.active", true);
-        initProperties.put("esbcloud.endpoint.ssl.keystore", "/home/fpa/planets/tatooine/yupiik/esb/esbcloud-distribution/src/main/resources/etc/ssl/keystore.jks");
-        initProperties.put("esbcloud.endpoint.ssl.password", "changeme");
 
         camelContext.getPropertiesComponent().setInitialProperties(initProperties);
         camelContext.getPropertiesComponent().loadProperties();
@@ -164,19 +155,6 @@ class EndpointTest extends CamelTestSupport {
                 .entity(throwable.getMessage())
                 .type(MediaType.APPLICATION_JSON)
                 .build());
-
-        KeyStoreParameters ksp = new KeyStoreParameters();
-        ksp.setResource(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.keystore").get());
-        ksp.setPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
-
-        KeyManagersParameters kmp = new KeyManagersParameters();
-        kmp.setKeyStore(ksp);
-        kmp.setKeyPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
-
-        SSLContextParameters scp = new SSLContextParameters();
-        scp.setKeyManagers(kmp);
-
-        camelContext.getRegistry().bind("sslContext", scp);
 
         return camelContext;
     }

@@ -56,19 +56,6 @@ objects:
             - env:
                 - name: JAVA_OPTS
                   value: "-Xms128m -Xmx256m -javaagent:./../jmx-exporter/jmx-exporter.jar=4444:./etc/jmx-exporter/config.yaml"
-                - name: GC_MAX_HEAP_FREE_RATIO
-                  value: "40"
-                - name: GC_MIN_HEAP_FREE_RATIO
-                  value: "20"
-                - name: GC_MAX_METASPACE_SIZE
-                  value: "256"
-                - name: GC_METASPACE_SIZE
-                  value: "96"
-                - name: JAVA_TOOL_OPTIONS
-                  value: >-
-                    -Dhttp.proxyHost=${java_http_proxy_host} -Dhttp.proxyPort=${java_http_proxy_port}
-                    -Dhttps.proxyHost=${java_http_proxy_host} -Dhttps.proxyPort=${java_http_proxy_port}
-                    -Dhttp.nonProxyHosts="${java_no_proxy}" -Dhttps.nonProxyHosts="${java_no_proxy}"
                 - name: LOG4J2_LOGGING_APPENDER_CONSOLE
                   value: "Console"
                 - name: LOG4J2_LOGGING_PATTERN_CONSOLE
@@ -124,7 +111,7 @@ objects:
               imagePullPolicy: IfNotPresent
               name: esbcloud
               command:
-                - /deployments/karaf/karaf/bin/karaf
+                - /karaf/bin/karaf
               args:
                 - run
               ports:
@@ -220,15 +207,6 @@ parameters:
     required: true
   - name: kafka_topic
     description: "the kafka topic"
-    required: true
-  - name: java_http_proxy_host
-    description: "Proxy HTTP to use"
-    required: true
-  - name: java_http_proxy_port
-    description: "Proxy Port to use"
-    required: true
-  - name: java_no_proxy
-    description: "List of non proxy hosts"
     required: true
   - name: replicas
     description: "Number of pod replicas. Default value is 1"

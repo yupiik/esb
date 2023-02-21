@@ -18,16 +18,15 @@ package io.yupiik.esb.services.endpoint;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.yupiik.esb.services.endpoint.route.EndpointRoute;
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.cxf.jaxrs.CxfRsComponent;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
-import org.apache.camel.support.jsse.SSLContextParameters;
-import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.apache.cxf.Bus;
 import org.apache.cxf.bus.CXFBusFactory;
+import org.apache.cxf.configuration.jsse.TLSServerParameters;
+import org.apache.cxf.transport.http_jetty.JettyHTTPServerEngineFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -57,11 +56,13 @@ public class EndpointCamelContext {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
         camelContext.setName("esbcloud-endpoint");
 
+        // osgi component property load
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));
 
         PropertiesComponent propertiesComponent = new PropertiesComponent();
         camelContext.setPropertiesComponent(propertiesComponent);
 
+        // load properties into camel context
         Properties initProperties = new Properties();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(context.getProperties().keys().asIterator(), 0), false)
                 .filter(key -> key.startsWith("esbcloud"))
@@ -70,16 +71,20 @@ public class EndpointCamelContext {
         camelContext.getPropertiesComponent().setInitialProperties(initProperties);
         camelContext.getPropertiesComponent().loadProperties();
 
+        // set thread pool profile for camel executor
         ThreadPoolProfile profile = camelContext.getExecutorServiceManager().getDefaultThreadPoolProfile();
         profile.setPoolSize(Integer.valueOf(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.context.thread.min").orElseThrow()));
         profile.setMaxPoolSize(Integer.valueOf(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.context.thread.max").orElseThrow()));
         profile.setMaxQueueSize(Integer.valueOf(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.context.queue.max").orElseThrow()));
 
+        // start camel context
         camelContext.start();
 
+        // set cxf default bus
         Bus bus = CXFBusFactory.getDefaultBus(true);
         camelContext.getRegistry().bind("cxf.bus", bus);
 
+        // add rest provider and extensions
         camelContext.getRegistry().bind("provider.jackson", new JacksonJsonProvider());
         camelContext.getRegistry().bind("provider.exceptionMapper", (ExceptionMapper<Exception>) throwable -> Response
                 .status(Response.Status.BAD_REQUEST)
@@ -87,24 +92,33 @@ public class EndpointCamelContext {
                 .type(MediaType.APPLICATION_JSON)
                 .build());
 
-        KeyStoreParameters keyStoreParameters = new KeyStoreParameters();
-        keyStoreParameters.setResource(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.keystore").get());
-        keyStoreParameters.setPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
+        // set SSL context with keystore if protocol is https
+        if (camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.host").orElse("").equals("https")) {
+            KeyStoreParameters keyStoreParameters = new KeyStoreParameters();
+            keyStoreParameters.setResource(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.keystore").get());
+            keyStoreParameters.setPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
+            keyStoreParameters.setType("JKS");
+            keyStoreParameters.setCamelContext(camelContext);
 
-        KeyManagersParameters keyManagersParameters = new KeyManagersParameters();
-        keyManagersParameters.setKeyStore(keyStoreParameters);
-        keyManagersParameters.setKeyPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
+            KeyManagersParameters keyManagersParameters = new KeyManagersParameters();
+            keyManagersParameters.setKeyStore(keyStoreParameters);
+            keyManagersParameters.setKeyPassword(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.ssl.password").get());
+            keyManagersParameters.setCamelContext(camelContext);
 
-        TrustManagersParameters trustManagersParameters = new TrustManagersParameters();
-        trustManagersParameters.setKeyStore(keyStoreParameters);
+            TLSServerParameters tlsServerParameters = new TLSServerParameters();
+            tlsServerParameters.setKeyManagers(keyManagersParameters.createKeyManagers());
 
-        SSLContextParameters sslContextParameters = new SSLContextParameters();
-        sslContextParameters.setKeyManagers(keyManagersParameters);
-        sslContextParameters.setTrustManagers(trustManagersParameters);
+            JettyHTTPServerEngineFactory jettyHTTPServerEngineFactory = bus.getExtension(JettyHTTPServerEngineFactory.class);
+            jettyHTTPServerEngineFactory.setTLSServerParametersForPort(
+                    Integer.parseInt(camelContext.getPropertiesComponent().resolveProperty("esbcloud.endpoint.port").get()),
+                    tlsServerParameters
+            );
+        }
 
-        camelContext.getRegistry().bind("sslContext", sslContextParameters);
-
+        // add camel routes
         camelContext.addRoutes(new EndpointRoute());
+
+        // registering the camel context in the osgi service registry
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);
     }
 

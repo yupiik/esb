@@ -31,6 +31,7 @@ public class HealthCheckRoute extends RouteBuilder {
                 .transform()
                 .simple("Error reported: ${exception.message}.");
 
+        // expose endpoint
         from("cxfrs:{{esbcloud.observability.healthcheck.protocol}}://{{esbcloud.observability.healthcheck.host}}:{{esbcloud.observability.healthcheck.port}}" +
                 "?resourceClasses=io.yupiik.esb.services.observability.api.HealthCheckApi" +
                 "&providers=provider.jackson,provider.exceptionMapper" +

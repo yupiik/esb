@@ -50,8 +50,7 @@ public class EndpointRoute extends RouteBuilder {
                 "?resourceClasses=io.yupiik.esb.api.jaxrs.NotificationApi" +
                 "&providers=provider.jackson,provider.exceptionMapper" +
                 "&loggingFeatureEnabled={{esbcloud.endpoint.cxf.trace.active}}" +
-                "&advanced.bus=cxf.bus" +
-                "&sslContextParameters=#sslContext")
+                "&advanced.bus=cxf.bus")
             .threads()
 
             .routeId("esbcloud-services-endpoint-route")

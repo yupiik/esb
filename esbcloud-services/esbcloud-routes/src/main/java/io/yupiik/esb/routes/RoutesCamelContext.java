@@ -52,11 +52,13 @@ public class RoutesCamelContext {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
         camelContext.setName("esbcloud-routes");
 
+        // osgi component property load
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));
 
         PropertiesComponent propertiesComponent = new PropertiesComponent();
         camelContext.setPropertiesComponent(propertiesComponent);
 
+        // load properties into camel context
         Properties initProperties = new Properties();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(context.getProperties().keys().asIterator(), 0), false)
                 .filter(key -> key.startsWith("esbcloud"))
@@ -65,10 +67,13 @@ public class RoutesCamelContext {
         camelContext.getPropertiesComponent().setInitialProperties(initProperties);
         camelContext.getPropertiesComponent().loadProperties();
 
+        // start camel context
         camelContext.start();
-        
+
+        // add jms connection factory into camel registry
         camelContext.getRegistry().bind("esbConnectionFactory", connectionFactory);
 
+        // configure kafka camel component
         KafkaConfiguration kafkaConfiguration = new KafkaConfiguration();
         kafkaConfiguration.setBrokers(camelContext.getPropertiesComponent().resolveProperty("esbcloud.kafka.brokers").orElseThrow());
         kafkaConfiguration.setRetries(3);
@@ -83,8 +88,11 @@ public class RoutesCamelContext {
         kafkaComponent.setConfiguration(kafkaConfiguration);
         camelContext.addComponent("kafka", kafkaComponent);
 
+        // add camel routes
         camelContext.addRoutes(new JmsRoute());
         camelContext.addRoutes(new KafkaRoute());
+
+        // registering the camel context in the osgi service registry
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);
     }
 

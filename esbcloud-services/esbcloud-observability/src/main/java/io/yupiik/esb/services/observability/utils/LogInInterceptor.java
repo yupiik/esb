@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 
 public class LogInInterceptor extends AbstractInDatabindingInterceptor {
-    private static final Logger logger = LoggerFactory.getLogger(LogInInterceptor.class);
     public LogInInterceptor() {
         super(Phase.RECEIVE);
     }
@@ -33,14 +32,5 @@ public class LogInInterceptor extends AbstractInDatabindingInterceptor {
     public void handleMessage(Message inMessage) throws Fault {
         // we don't want to log probe request
         if (String.valueOf(inMessage.get("org.apache.cxf.request.uri")).startsWith("/health")) return;
-
-        HttpServletRequest request = (HttpServletRequest) inMessage.get("HTTP.REQUEST");
-        StringBuilder headers = new StringBuilder();
-        request.getHeaderNames().asIterator().forEachRemaining(
-                name -> headers.append(name).append(": ").append(request.getHeader(name)).append(" | "));
-        logger.info("AccessLog :: {} {} | {}",
-                inMessage.get("org.apache.cxf.request.method"),
-                inMessage.get("org.apache.cxf.request.url"),
-                headers);
     }
 }

@@ -58,11 +58,13 @@ public class ObservabilityCamelContext {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
         camelContext.setName("esbcloud-observability");
 
+        // osgi component property load
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));
 
         PropertiesComponent propertiesComponent = new PropertiesComponent();
         camelContext.setPropertiesComponent(propertiesComponent);
 
+        // load properties into camel context
         Properties initProperties = new Properties();
         StreamSupport.stream(Spliterators.spliteratorUnknownSize(context.getProperties().keys().asIterator(), 0), false)
                 .filter(key -> key.startsWith("esbcloud"))
@@ -70,12 +72,17 @@ public class ObservabilityCamelContext {
 
         camelContext.getPropertiesComponent().setInitialProperties(initProperties);
         camelContext.getPropertiesComponent().loadProperties();
+
+        // start camel context
         camelContext.start();
 
+        // set cxf bus
         Bus bus = CXFBusFactory.getDefaultBus(true);
+        // disable probe request
         bus.getInInterceptors().add(new LogInInterceptor());
         camelContext.getRegistry().bind("cxf.bus", bus);
 
+        // add rest provider and extensions
         camelContext.getRegistry().bind("provider.jackson", new JacksonJsonProvider());
         camelContext.getRegistry().bind("provider.exceptionMapper", (ExceptionMapper<Exception>) throwable -> Response
                 .status(Response.Status.BAD_REQUEST)
@@ -83,12 +90,15 @@ public class ObservabilityCamelContext {
                 .type(MediaType.APPLICATION_JSON)
                 .build());
 
+        // add healthservice bean in camel registry
         camelContext.getRegistry().bind("io.yupiik.esb.services.observability.component.healthService", healthService);
 
+        // add camel healthcheck extension
         HealthCheckRegistry checkRegistry = new DefaultHealthCheckRegistry();
         checkRegistry.register(new RoutesHealthCheckRepository());
         camelContext.setExtension(HealthCheckRegistry.class, checkRegistry);
 
+        // add camel routes
         camelContext.addRoutes(new HealthCheckRoute());
         camelServiceRegistration = context.getBundleContext().registerService(CamelContext.class, camelContext, null);
     }

@@ -15,8 +15,6 @@
  */
 package io.yupiik.esb.services.observability.component;
 
-import io.yupiik.esb.services.observability.model.CamelContextStatus;
-import io.yupiik.esb.services.observability.model.ConnectionFactoryStatus;
 import org.apache.camel.CamelContext;
 import org.apache.camel.health.HealthCheck;
 import org.apache.camel.health.HealthCheckHelper;
@@ -29,13 +27,9 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.ConnectionMetaData;
 import javax.jms.JMSException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
