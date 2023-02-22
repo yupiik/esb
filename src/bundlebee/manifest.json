@@ -216,7 +216,8 @@
         "service.name": "esbcloud1",
         "service.nodePort": "31101",
         "service.healthPort": "31102",
-        "service.metricPort": "31103"
+        "service.metricPort": "31103",
+        "service.replicas": "2"
       }
     },
     {

@@ -97,8 +97,9 @@
               "initialDelaySeconds": 10,
               "periodSeconds": 10,
               "failureThreshold": 10,
+              "timeoutSeconds": 30,
               "httpGet": {
-                "path": "{{service.probes.readiness.path:-/health/liveness}}",
+                "path": "{{service.probes.readiness.path:-/health/readinesss}}",
                 "port": 8888
               }
             },
@@ -108,7 +109,7 @@
               "failureThreshold": 10,
               "timeoutSeconds": 30,
               "httpGet": {
-                "path": "{{service.probes.liveness.path:-/health/readiness}}",
+                "path": "{{service.probes.liveness.path:-/health/livenes}}",
                 "port": 8888
               }
             }
