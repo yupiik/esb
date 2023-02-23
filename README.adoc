@@ -115,26 +115,6 @@ esbcloud.endpoint.cxf.trace.active==$[env:ESBCLOUD_ENDPOINT_CXF_TRACE_ACTIVE;def
 
 You can replace the default values.
 
-
-== Docker
-
-[source,xml]
-----
-<entrypoint>
-    <entrypoint>/karaf/bin/karaf</entrypoint>
-    <entrypoint>run</entrypoint>
-</entrypoint>
-<workingDirectory>/karaf</workingDirectory>
-<permissions>
-    <permission>
-        <file>/karaf/bin/karaf</file> <!-- executable entrypoint -->
-        <mode>755</mode>
-    </permission>
-</permissions>
-----
-
-Health check is available at `http://host:8080/health/liveness` and `http://host:8080/health/readiness`
-
 == Development
 
 === Debug
@@ -214,4 +194,75 @@ curl -X 'POST' \
   "date": "01/01/1970 00:00:00",
   "message": "Update contract"
 }'
+----
+
+== Docker
+
+The configuration of the docker build is done with the `maven-jib-plugin`
+
+[source,xml]
+----
+<plugin>
+    <groupId>com.google.cloud.tools</groupId>
+    <artifactId>jib-maven-plugin</artifactId>
+    <version>3.3.1</version>
+    <configuration>
+        <allowInsecureRegistries>true</allowInsecureRegistries>
+        <from>
+            <image>ossyupiik/java:17.0.4</image> <1>
+        </from>
+        <to>
+            <image>io.yupiik.esbcloud/esbcloud-distribution:${project.version}</image> <2>
+        </to>
+        <container>
+            <entrypoint> <3>
+                <entrypoint>/karaf/bin/karaf</entrypoint>
+                <entrypoint>run</entrypoint>
+            </entrypoint>
+            <workingDirectory>/karaf</workingDirectory>
+        </container>
+        <extraDirectories>
+            <paths>
+                <path>target/assembly</path>
+            </paths>
+            <permissions>
+                <permission>
+                    <file>/karaf/bin/karaf</file>
+                    <mode>755</mode>
+                </permission>
+            </permissions>
+        </extraDirectories>
+    </configuration>
+</plugin>
+----
+
+<.> The docker image base
+<.> The docker image to build
+<.> The entrypoint of the command to execute when running the docker
+
+Health checks are available at:
+
+* `http://host:8080/health/liveness` for the liveness probe
+* `http://host:8080/health/readiness` for the readiness probe
+
+[source,shell]
+----
+mvn compile jib:dockerBuild
+----
+
+You can see the image on your local docker registry:
+
+[source,shell]
+----
+docker images
+>
+REPOSITORY                                                  TAG                   IMAGE ID            CREATED             SIZE
+io.yupiik.esbcloud/esbcloud-distribution                    1.0.0-SNAPSHOT        29df4227923c        1 years ago        490MB
+----
+
+Now you can run a container:
+
+[source,shell]
+----
+docker run -it --name esbcloud io.yupiik.esbcloud/esbcloud-distribution:1.0.0-SNAPSHOT
 ----
