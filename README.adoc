@@ -9,7 +9,7 @@ The purpose of this repository is to show how to build a custom ESB based on Apa
 Prerequisite:
 
 * Maven 3.x
-* JDK 11
+* JDK 11+
 
 To build the project:
 
@@ -97,8 +97,9 @@ When running the instance locally you can define the properties in
 
 [source]
 ----
-./distribution/target/assembly/karaf/bin/karaf/etc/io.yupiik.esbcloud.entrypoint.camelcontext.cfg
-./distribution/target/assembly/karaf/bin/karaf/etc/io.yupiik.esbcloud.services.collect.camelcontext.cfg
+./distribution/target/assembly/karaf/bin/karaf/etc/io.yupiik.esb.routes.camelcontext.cfg
+./distribution/target/assembly/karaf/bin/karaf/etc/io.yupiik.esb.services.endpoint.camelcontext.cfg
+./distribution/target/assembly/karaf/bin/karaf/etc/io.yupiik.esb.services.observability.camelcontext.cfg
 ----
 
 Properties are loaded by Felix ConfigAdmin interpolate:
@@ -132,7 +133,7 @@ You can replace the default values.
 </permissions>
 ----
 
-Health check is available at `http://host:8080/status`
+Health check is available at `http://host:8080/health/liveness` and `http://host:8080/health/readiness`
 
 == Development
 
@@ -199,7 +200,7 @@ curl -X 'POST' \
 }'
 ----
 
-=== Send notification to unknown
+=== Send notification to unknown system (will fail)
 
 [source,shell]
 ----
