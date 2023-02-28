@@ -50,7 +50,7 @@
         <cxf.version>3.5.5</cxf.version>
         <activemq.version>5.17.0</activemq.version>
 
-        <jackson.version>2.14.0</jackson.version>
+        <jackson.version>2.14.2</jackson.version>
         <javax.activation>1.2.0</javax.activation>
         <javax.validation>1.1.0.Final</javax.validation>
         <jakarta.jaxrs.version>2.1.6</jakarta.jaxrs.version>
@@ -306,6 +306,20 @@ under the License.
                         <version>1.0.19</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin><!--  mvn ossindex:audit -->
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>audit-dependencies</id>
+                        <phase />
+                        <goals>
+                            <goal>audit</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
