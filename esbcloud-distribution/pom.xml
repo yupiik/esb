@@ -217,6 +217,8 @@
                         <image>io.yupiik.esbcloud/esbcloud-distribution:${project.version}</image>
                     </to>
                     <container>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <format>Docker</format><!-- use OCI to build oci container -->
                         <entrypoint>
                             <entrypoint>/karaf/bin/karaf</entrypoint>
                             <entrypoint>run</entrypoint>
