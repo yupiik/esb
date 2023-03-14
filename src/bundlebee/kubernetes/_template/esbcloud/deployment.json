@@ -99,7 +99,7 @@
               "failureThreshold": 10,
               "timeoutSeconds": 30,
               "httpGet": {
-                "path": "{{service.probes.readiness.path:-/health/readinesss}}",
+                "path": "{{service.probes.readiness.path:-/health/readiness}}",
                 "port": 8888
               }
             },
@@ -109,7 +109,7 @@
               "failureThreshold": 10,
               "timeoutSeconds": 30,
               "httpGet": {
-                "path": "{{service.probes.liveness.path:-/health/livenes}}",
+                "path": "{{service.probes.liveness.path:-/health/liveness}}",
                 "port": 8888
               }
             }
