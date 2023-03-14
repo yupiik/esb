@@ -242,6 +242,8 @@
     </build>
 
     <profiles>
+
+        <!-- mvn test -Pe2e-on-dev -->
         <profile>
             <id>e2e-on-dev</id>
             <build>
@@ -257,6 +259,62 @@
                             <includes>
                                 <include>e2e/dev/*Test.java</include>
                             </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- mvn jmeter:configure jmeter:jmeter jmeter:results -Pperformance -->
+        <profile>
+            <id>performance</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.lazerycode.jmeter</groupId>
+                        <artifactId>jmeter-maven-plugin</artifactId>
+                        <version>3.7.0</version>
+                        <executions>
+                            <!-- Generate JMeter configuration -->
+                            <execution>
+                                <id>configuration</id>
+                                <goals>
+                                    <goal>configure</goal>
+                                </goals>
+                            </execution>
+                            <!-- Run JMeter tests -->
+                            <execution>
+                                <id>jmeter-tests</id>
+                                <goals>
+                                    <goal>jmeter</goal>
+                                </goals>
+                            </execution>
+                            <!-- Fail build on errors in test -->
+                            <execution>
+                                <id>jmeter-check-results</id>
+                                <goals>
+                                    <goal>results</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <propertiesUser>
+                                <threadgroup00.name>ESB api test</threadgroup00.name>
+                                <!--number of threads to use-->
+                                <threadgroup00.numberOfThreads>100</threadgroup00.numberOfThreads>
+                                <!--delay of the test in seconds-->
+                                <threadgroup00.scheduledDelay>0</threadgroup00.scheduledDelay>
+                                <!--duration of the test in seconds-->
+                                <threadgroup00.scheduledDuration>5</threadgroup00.scheduledDuration>
+                                <!--how long till all threads are up and running in seconds-->
+                                <threadgroup00.rampUp>1</threadgroup00.rampUp>
+                                <!--target throughput of all threads of the group per minute-->
+                                <threadgroup00.throughput>100000000</threadgroup00.throughput>
+                                <protocol>http</protocol>
+                                <server>192.168.49.2</server>
+                                <port>31101</port>
+                            </propertiesUser>
+                            <ignoreResultFailures>true</ignoreResultFailures>
                         </configuration>
                     </plugin>
                 </plugins>

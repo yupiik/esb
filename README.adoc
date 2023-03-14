@@ -196,6 +196,30 @@ curl -X 'POST' \
 }'
 ----
 
+=== E2E with Cucumber
+
+The cucumber e2e tests are located in the `esbcloud-distribution` module.
+
+To launch them, just run the command:
+
+[source,shell script]
+----
+mvn test -Pe2e-on-dev
+----
+
+=== Load test with JMeter
+
+The JMeter load tests are located in the `esbcloud-distribution` module.
+
+To launch them, just run the command:
+
+[source,shell script]
+----
+mvn jmeter:configure jmeter:jmeter jmeter:results -Pperformance
+----
+
+You can update the load test in `src/test/jmeter/jmeter-test-plan.jmx`
+
 == Docker
 
 The configuration of the docker build is done with the `maven-jib-plugin`
