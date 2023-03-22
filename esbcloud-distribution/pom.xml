@@ -16,7 +16,8 @@
     under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.yupiik.esbcloud</groupId>
         <artifactId>esbcloud-parent</artifactId>
@@ -27,6 +28,7 @@
 
     <artifactId>esbcloud-distribution</artifactId>
     <name>ESB Cloud :: Distribution</name>
+    <packaging>pom</packaging>
 
     <properties>
         <jmx.exporter.version>0.17.2</jmx.exporter.version>
@@ -193,6 +195,12 @@
                     <startupFeatures>
                         <feature>eventadmin</feature>
                     </startupFeatures>
+                    <startupBundles>
+                        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+                        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+                        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+                        <bundle>mvn:org.ops4j.pax.logging/pax-logging-log4j2-extra/2.2.0</bundle>
+                    </startupBundles>
                     <blacklistedBundles>
                     </blacklistedBundles>
                     <archiveTarGz>true</archiveTarGz>
@@ -268,6 +276,9 @@
         <!-- mvn jmeter:configure jmeter:jmeter jmeter:results -Pperformance -->
         <profile>
             <id>performance</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>

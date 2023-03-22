@@ -16,18 +16,22 @@
 package io.yupiik.esb.services.endpoint.route;
 
 import io.yupiik.esb.api.jaxrs.model.Acknowledge;
+import io.yupiik.esb.services.endpoint.Log;
 import io.yupiik.esb.services.endpoint.processor.ResponseProcessor;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.ObjectMessage;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static io.yupiik.esb.services.endpoint.Log.Type.AUDIT;
+
 public class EndpointRoute extends RouteBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(EndpointRoute.class);
+    private static final Logger logger = LogManager.getLogger(EndpointRoute.class);
 
     private final static String ROUTING_HEADER = "X-Routing-System";
 
@@ -57,7 +61,8 @@ public class EndpointRoute extends RouteBuilder {
 
             // log exchange headers in debug
             .process(exchange -> {
-                exchange.getMessage().getHeaders().forEach((key, value) -> logger.info("Exchange headers :: {} = {}", key, value));
+                exchange.getMessage().getHeaders().forEach(
+                        (key, value) -> logger.info(new ObjectMessage(new Log(AUDIT,"Exchange headers " +  key + "=" + value))));
             })
 
             // send to dedicated route base on http header value
