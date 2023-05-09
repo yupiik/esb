@@ -28,7 +28,7 @@
 
     <artifactId>esbcloud-distribution</artifactId>
     <name>ESB Cloud :: Distribution</name>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <jmx.exporter.version>0.17.2</jmx.exporter.version>
@@ -112,6 +112,25 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
