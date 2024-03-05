@@ -21,7 +21,7 @@ import io.yupiik.esb.services.observability.routes.HealthCheckRoute;
 import io.yupiik.esb.services.observability.utils.LogInInterceptor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.properties.PropertiesComponent;
-import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
+import org.apache.camel.karaf.core.OsgiDefaultCamelContext;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.impl.health.DefaultHealthCheckRegistry;
 import org.apache.camel.impl.health.RoutesHealthCheckRepository;
@@ -56,7 +56,6 @@ public class ObservabilityCamelContext {
     @Activate
     public void activate(ComponentContext context) throws Exception {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
-        camelContext.setName("esbcloud-observability");
 
         // osgi component property load
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));
@@ -92,11 +91,6 @@ public class ObservabilityCamelContext {
 
         // add healthservice bean in camel registry
         camelContext.getRegistry().bind("io.yupiik.esb.services.observability.component.healthService", healthService);
-
-        // add camel healthcheck extension
-        HealthCheckRegistry checkRegistry = new DefaultHealthCheckRegistry();
-        checkRegistry.register(new RoutesHealthCheckRepository());
-        camelContext.setExtension(HealthCheckRegistry.class, checkRegistry);
 
         // add camel routes
         camelContext.addRoutes(new HealthCheckRoute());

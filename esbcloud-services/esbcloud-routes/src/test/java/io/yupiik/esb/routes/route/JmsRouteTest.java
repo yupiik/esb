@@ -33,12 +33,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.ConnectionMetaData;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.ObjectMessage;
@@ -62,7 +59,7 @@ class JmsRouteTest extends CamelTestSupport {
             throw new IllegalStateException(e);
         }
 
-        broker =  new BrokerService();
+        broker = new BrokerService();
         broker.setPersistenceAdapter(new MemoryPersistenceAdapter());
         broker.setUseJmx(false);
         broker.setBrokerName("esb-test-broker");
@@ -88,18 +85,19 @@ class JmsRouteTest extends CamelTestSupport {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
         connectionFactory.setTrustAllPackages(true);
 
-        try (Connection connection = connectionFactory.createConnection()) {
-            connection.start();
-            ActiveMQQueue activeMQQueue = new ActiveMQQueue(BROKER_QUEUE);
-            Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-            MessageConsumer consumer = session.createConsumer(activeMQQueue);
-            ObjectMessage message = (ObjectMessage) consumer.receive(5L);
-            message.acknowledge();
-            Notification notificationReceived = (Notification) message.getObject();
+        Connection connection = connectionFactory.createConnection();
+        connection.start();
+        ActiveMQQueue activeMQQueue = new ActiveMQQueue(BROKER_QUEUE);
+        Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+        MessageConsumer consumer = session.createConsumer(activeMQQueue);
+        ObjectMessage message = (ObjectMessage) consumer.receive(5L);
+        message.acknowledge();
+        Notification notificationReceived = (Notification) message.getObject();
 
-            Assertions.assertNotNull(notificationReceived);
-            Assertions.assertEquals(sendExchange.getMessage().getBody(Notification.class).getReference(), notificationReceived.getReference());
-        }
+        Assertions.assertNotNull(notificationReceived);
+        Assertions.assertEquals(sendExchange.getMessage().getBody(Notification.class).getReference(), notificationReceived.getReference());
+        connection.stop();
+        connection.close();
     }
 
     @Override

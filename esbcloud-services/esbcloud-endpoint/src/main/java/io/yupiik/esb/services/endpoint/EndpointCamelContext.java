@@ -19,7 +19,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.yupiik.esb.services.endpoint.route.EndpointRoute;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.properties.PropertiesComponent;
-import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
+import org.apache.camel.karaf.core.OsgiDefaultCamelContext;
 import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
@@ -54,7 +54,6 @@ public class EndpointCamelContext {
     @Activate
     public void activate(ComponentContext context) throws Exception {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
-        camelContext.setName("esbcloud-endpoint");
 
         // osgi component property load
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));

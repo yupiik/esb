@@ -21,7 +21,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.component.kafka.KafkaComponent;
 import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.camel.component.properties.PropertiesComponent;
-import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
+import org.apache.camel.karaf.core.OsgiDefaultCamelContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -50,7 +50,6 @@ public class RoutesCamelContext {
     @Activate
     public void activate(ComponentContext context) throws Exception {
         camelContext = new OsgiDefaultCamelContext(context.getBundleContext());
-        camelContext.setName("esbcloud-routes");
 
         // osgi component property load
         context.getProperties().keys().asIterator().forEachRemaining(key -> logger.info("Camel local property :: {} = {}", key, context.getProperties().get(key)));

@@ -44,9 +44,9 @@
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 
         <!-- based stack -->
-        <camel.version>3.20.1</camel.version>
+        <camel.version>4.4.0-SNAPSHOT</camel.version>
         <osgi.version>7.0.0</osgi.version>
-        <karaf.version>4.4.3</karaf.version>
+        <karaf.version>4.4.5</karaf.version>
         <cxf.version>3.5.5</cxf.version>
         <activemq.version>5.17.0</activemq.version>
 
